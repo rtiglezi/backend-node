@@ -9,8 +9,8 @@ exports.environment = {
     db: { url: process.env.URL_DB || 'mongodb://localhost/e-proc' },
     security: {
         saltRounds: process.env.SALT_ROUNDS || 10,
-        apiSecret: process.env.API_SECERT || 'segredodaapi',
-        emailSecret: process.env.EMAIL_SECERT || 'segredodoemail',
+        apiSecret: process.env.API_SECERT || 'EPrc2@1819_Rjx1',
+        emailSecret: process.env.EMAIL_SECERT || 'SbX_4515@9055AA',
         enableHTTPS: process.env.ENABLE_HTTPS || false,
         certificate: process.env.CERT_FILE || './security/keys/cert.pem',
         key: process.env.CERT_KEY_FILE || './security/keys/key.pem'

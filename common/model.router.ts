@@ -53,7 +53,7 @@ export abstract class ModelRouter<D extends mongoose.Document> extends Router {
        formato válido */
     validateId = (req, resp, next) => {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            next(new NotFoundError('Document not found'))
+            next(new NotFoundError('Document not found.'))
         } else {
             next()
         }
@@ -104,7 +104,7 @@ export abstract class ModelRouter<D extends mongoose.Document> extends Router {
                 if (result.n) {
                     return this.model.findById(req.params.id).exec()
                 } else {
-                    throw new NotFoundError('Documento não encontrado')
+                    throw new NotFoundError('Document not found.')
                 }
             }).then(this.render(resp, next))
             .catch(next)
@@ -129,7 +129,7 @@ export abstract class ModelRouter<D extends mongoose.Document> extends Router {
                 if (cmdResult.result.n) {
                     resp.send(204)
                 } else {
-                    throw new NotFoundError('Documento não encontrado.')
+                    throw new NotFoundError('Document not found.')
                 }
                 return next()
             }).catch(next)

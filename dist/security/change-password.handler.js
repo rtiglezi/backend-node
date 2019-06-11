@@ -9,7 +9,7 @@ exports.changePassword = (req, resp, next) => {
     users_model_1.User.findByEmail(req.authenticated.email, '+password')
         .then(user => {
         if (!password || !user)
-            return next(new restify_errors_1.NotAuthorizedError('Invalid credentials'));
+            return next(new restify_errors_1.NotAuthorizedError('Invalid credentials.'));
         if (!user.matches(password))
             return next(new restify_errors_1.NotAuthorizedError('Password is not correct.'));
         if (!newPassword)

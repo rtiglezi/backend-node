@@ -7,7 +7,7 @@ exports.authorize = (...profiles) => {
             next();
         }
         else {
-            next(new restify_errors_1.ForbiddenError('Permission denied'));
+            next(new restify_errors_1.ForbiddenError('Permission denied.'));
         }
     };
 };

@@ -12,7 +12,7 @@ export const changePassword: restify.RequestHandler = (req, resp, next) => {
     .then(user => {
 
       if (!password || !user)
-        return next(new NotAuthorizedError('Invalid credentials'))
+        return next(new NotAuthorizedError('Invalid credentials.'))
 
       if (!user.matches(password))
         return next(new NotAuthorizedError('Password is not correct.'))

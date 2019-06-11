@@ -10,7 +10,6 @@ exports.authenticate = (req, resp, next) => {
         .then(user => {
         if (!user || !user.matches(password))
             return next(new restify_errors_1.NotAuthorizedError('Invalid Credentials'));
-        //console.log(`Usuario ${user.name} logado no sistema.`)
         const token = jwt.sign({ sub: user.email, iss: 'e-proc-api' }, environment_1.environment.security.apiSecret);
         resp.json({ name: user.name, email: user.email, accessToken: token });
         return next(false);

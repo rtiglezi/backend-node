@@ -40,7 +40,7 @@ export abstract class ModelRouter<D extends mongoose.Document> extends Router {
                 if (last % 1 === 0) {
                     last = Math.trunc(last)
                 } else {
-                    last = Math.trunc(last+1)
+                    last = Math.trunc(last + 1)
                 }
                 resource._links.last = `${this.basePath}?_page=${last}`
             }
@@ -69,9 +69,16 @@ export abstract class ModelRouter<D extends mongoose.Document> extends Router {
             .then(count => this.model.find()
                 .limit(this.pageSize)
                 .skip(skip)
-                .then(this.renderAll(resp, next, {
-                    page, count, pageSize: this.pageSize, url: req.url
-                })))
+                .then(this.renderAll(
+                    resp,
+                    next,
+                    {
+                        page,
+                        count,
+                        pageSize: this.pageSize,
+                        url: req.url
+                    }
+                )))
             .catch(next)
     }
 

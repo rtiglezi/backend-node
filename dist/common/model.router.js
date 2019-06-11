@@ -30,7 +30,10 @@ class ModelRouter extends router_1.Router {
                 .limit(this.pageSize)
                 .skip(skip)
                 .then(this.renderAll(resp, next, {
-                page, count, pageSize: this.pageSize, url: req.url
+                page,
+                count,
+                pageSize: this.pageSize,
+                url: req.url
             })))
                 .catch(next);
         };

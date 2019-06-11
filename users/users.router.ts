@@ -1,4 +1,4 @@
-import { changePassword } from './../security/changePassword';
+import { changePassword } from '../security/change-password.handler';
 import { ModelRouter } from './../common/model.router'
 import * as restify from 'restify'
 import { User } from './users.model'

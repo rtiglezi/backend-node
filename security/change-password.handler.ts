@@ -1,5 +1,5 @@
 import * as restify from 'restify'
-import { User } from './../users/users.model'
+import { User } from '../users/users.model'
 import { ForbiddenError, NotAuthorizedError, BadRequestError } from 'restify-errors';
 
 export const changePassword: restify.RequestHandler = (req, resp, next) => {

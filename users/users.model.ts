@@ -100,6 +100,7 @@ const hasPassword = (obj, next) => {
 
 const saveMiddleware = function (next) {
     const user: User = this
+    console.log(user)
     if (!user.isModified('password')) {
         next()
     } else {

@@ -49,7 +49,8 @@ export abstract class ModelRouter<D extends mongoose.Document> extends Router {
     }
 
     /* validação para identificar se o parâmetro
-       passado via get corresponde a um id do banco */
+       passado via get corresponde a um id com 
+       formato válido */
     validateId = (req, resp, next) => {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             next(new NotFoundError('Document not found'))

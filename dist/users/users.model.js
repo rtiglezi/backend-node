@@ -65,7 +65,7 @@ userSchema.methods.hasAny = function (...profiles) {
     return profiles.some(profile => this.profiles.indexOf(profile) !== -1);
 };
 /* função para aproveitar código nas duas middlewares abaixo */
-const hasPassword = (obj, next) => {
+const hashPassword = (obj, next) => {
     bcrypt.hash(obj.password, environment_1.environment.security.saltRounds)
         .then(hash => {
         obj.password = hash;
@@ -79,7 +79,7 @@ const saveMiddleware = function (next) {
         next();
     }
     else {
-        hasPassword(user, next);
+        hashPassword(user, next);
     }
 };
 const updateMiddleware = function (next) {
@@ -87,7 +87,7 @@ const updateMiddleware = function (next) {
         next();
     }
     else {
-        hasPassword(this.getUpdate(), next);
+        hashPassword(this.getUpdate(), next);
     }
 };
 /* middleware para criptografar a senha no momento de inserir */

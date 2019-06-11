@@ -1,10 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const change_password_handler_1 = require("../security/change-password.handler");
 const model_router_1 = require("./../common/model.router");
 const users_model_1 = require("./users.model");
 const auth_handler_1 = require("../security/auth.handler");
 const authz_handler_1 = require("./../security/authz.handler");
+const change_password_handler_1 = require("../security/change-password.handler");
+const forgot_password_handler_1 = require("../security/forgot-password.handler");
 class UsersRouter extends model_router_1.ModelRouter {
     constructor() {
         super(users_model_1.User);
@@ -49,6 +50,7 @@ class UsersRouter extends model_router_1.ModelRouter {
         // rotas para controle de acesso
         application.post(`${this.basePath}/authenticate`, auth_handler_1.authenticate);
         application.patch(`${this.basePath}/:id/changepass`, [authz_handler_1.authorize('user'), this.validateId, change_password_handler_1.changePassword, this.update]);
+        application.post(`${this.basePath}/forgotpass`, forgot_password_handler_1.forgotPassword);
     }
 }
 /* instanciar esta classe e disponibilizá-la para

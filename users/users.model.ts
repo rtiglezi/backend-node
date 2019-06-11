@@ -90,7 +90,7 @@ userSchema.methods.hasAny = function (...profiles: string[]): boolean {
 }
 
 /* função para aproveitar código nas duas middlewares abaixo */
-const hasPassword = (obj, next) => {
+const hashPassword = (obj, next) => {
     bcrypt.hash(obj.password, environment.security.saltRounds)
         .then(hash => {
             obj.password = hash
@@ -104,7 +104,7 @@ const saveMiddleware = function (next) {
     if (!user.isModified('password')) {
         next()
     } else {
-        hasPassword(user, next)
+        hashPassword(user, next)
     }
 }
 
@@ -112,7 +112,7 @@ const updateMiddleware = function (next) {
     if (!this.getUpdate().password) {
         next()
     } else {
-        hasPassword(this.getUpdate(), next)
+        hashPassword(this.getUpdate(), next)
     }
 }
 

@@ -29,7 +29,7 @@ function applyBearer(req, next) {
         if (decoded) {
             users_model_1.User.findByEmail(decoded.sub).then(user => {
                 if (user) {
-                    //associar o usuário no request
+                    //associar o usuário ao request
                     req.authenticated = user; //
                 }
                 next();

@@ -30,7 +30,7 @@ function applyBearer (req: restify.Request, next): (error, decoded) => void {
     if(decoded) {
       User.findByEmail(decoded.sub).then(user=>{
         if(user){
-          //associar o usuário no request
+          //associar o usuário ao request
           req.authenticated = user //
         }
         next()

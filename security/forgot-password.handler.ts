@@ -5,6 +5,7 @@ import { NotFoundError } from 'restify-errors'
 import * as bcrypt from 'bcrypt'
 import { environment } from './../common/environment';
 import * as jwt from 'jsonwebtoken'
+import { sendMail } from '../common/sendGridEmail';
 
 
 export const forgotPassword: restify.RequestHandler = (req, resp, next) => {
@@ -22,8 +23,17 @@ export const forgotPassword: restify.RequestHandler = (req, resp, next) => {
             }
             const token = jwt.sign(payload, environment.security.emailSecret, { expiresIn: '1h' })
             
-            /* o token deverá ser encaminhado ao usuário via e-mail,
-               juntamente com um link com acesso para a tela de alteração da senha */
+            let sbj  = "Troca de senha."
+          let txt  = `Olá, ${user.name}. Realize sua troca de senha.`
+            let tag = `
+            Olá, ${user.name}.<br/>
+            Conforme sua solicitação, segue link para realizar a troca de sua senha.<br/>
+            <br/>
+            <a href='http://localhost:3000/users/resetpass?token=${token}'>Clique aqui para alterar sua senha.</a>
+            `
+    
+            sendMail(user.email, sbj, txt, tag)
+
             resp.json({token})
         
           }).catch(next)

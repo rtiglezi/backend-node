@@ -120,6 +120,7 @@ export abstract class ModelRouter<D extends mongoose.Document> extends Router {
             .catch(next)
     }
 
+
     delete = (req, resp, next) => {
         this.model.remove({ _id: req.params.id })
             .exec()

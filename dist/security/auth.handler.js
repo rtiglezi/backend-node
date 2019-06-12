@@ -10,7 +10,11 @@ exports.authenticate = (req, resp, next) => {
         .then(user => {
         if (!user || !user.matches(password))
             return next(new restify_errors_1.NotAuthorizedError('Invalid credentials'));
-        const token = jwt.sign({ sub: user.email, iss: 'e-proc-api' }, environment_1.environment.security.apiSecret, { expiresIn: '10h' });
+        let payload = {
+            sub: user.email,
+            iss: 'e-proc-api'
+        };
+        const token = jwt.sign(payload, environment_1.environment.security.apiSecret, { expiresIn: '10h' });
         resp.json({ name: user.name, email: user.email, accessToken: token });
         return next(false);
     }).catch(next);

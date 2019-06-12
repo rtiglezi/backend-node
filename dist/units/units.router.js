@@ -8,8 +8,8 @@ class UnitsRouter extends model_router_1.ModelRouter {
         super(units_model_1.Unit);
     }
     applyRoutes(application) {
-        application.get(`${this.basePath}`, this.findAll);
-        application.get(`${this.basePath}/:id`, [this.validateId, this.findById]);
+        application.get(`${this.basePath}`, [authz_handler_1.authorize('admin'), this.findAll]);
+        application.get(`${this.basePath}/:id`, [authz_handler_1.authorize('user'), this.validateId, this.findById]);
         application.post(`${this.basePath}`, [authz_handler_1.authorize('admin'), this.save]);
         application.put(`${this.basePath}/:id`, [authz_handler_1.authorize('admin'), this.validateId, this.replace]);
         application.patch(`${this.basePath}/:id`, [authz_handler_1.authorize('admin'), this.validateId, this.update]);

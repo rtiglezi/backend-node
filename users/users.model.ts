@@ -25,6 +25,7 @@ export interface UserModel extends mongoose.Model<User> {
     findByEmail(email: string, projection?: string): Promise<User>
 }
 
+
 /* schema server para informar ao mongoose
    quais são os metadados do documento */
 const userSchema = new mongoose.Schema({

@@ -5,6 +5,7 @@ import { authenticate } from '../security/auth.handler'
 import { authorize } from './../security/authz.handler';
 import { changePassword } from '../security/change-password.handler';
 import { forgotPassword } from '../security/forgot-password.handler';
+import { resetPassword } from '../security/reset-password.handler';
 
 
 class UsersRouter extends ModelRouter<User> {
@@ -56,8 +57,9 @@ class UsersRouter extends ModelRouter<User> {
     application.post(`${this.basePath}/authenticate`, authenticate)
     application.patch(`${this.basePath}/:id/changepass`, [authorize('user'), this.validateId, changePassword, this.update])
     application.post(`${this.basePath}/forgotpass`, forgotPassword)
- 
+    application.post(`${this.basePath}/resetpass`, resetPassword)
   }
+
 }
 
 /* instanciar esta classe e disponibilizá-la para

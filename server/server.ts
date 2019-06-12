@@ -67,7 +67,8 @@ export class Server {
                    conforme recomenda a especificação */
                 this.application.use(mergePatchBodyParser)
 
-
+                /* todos os requests passarão pelo crivo
+                   do método "tokenParser", em toda a aplicação */
                 this.application.use(tokenParser)
 
                 // constante que pegará o ip local

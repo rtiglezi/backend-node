@@ -15,10 +15,18 @@ export const forgotPassword: restify.RequestHandler = (req, resp, next) => {
       if(!user)
         return next(new NotFoundError('E-mail not found.'))
         bcrypt.hash(user.password, environment.security.saltRounds)
-        .then(hash => {
-            const token = jwt.sign({ sub: user.email, iss: 'e-proc-api' }, environment.security.apiSecret, { expiresIn: '10h' })
+        .then(() => {
+            let payload = {
+              sub: user.email, 
+              iss: 'e-proc-api'
+            }
+            const token = jwt.sign(payload, environment.security.emailSecret, { expiresIn: '1h' })
+            
+            /* o token deverá ser encaminhado ao usuário via e-mail,
+               juntamente com um link com acesso para a tela de alteração da senha */
             resp.json({token})
-        }).catch(next)
+        
+          }).catch(next)
     })
     
 }

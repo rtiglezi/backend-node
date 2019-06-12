@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const server_1 = require("./server/server");
 const users_router_1 = require("./users/users.router");
 const units_router_1 = require("./units/units.router");
+const main_router_1 = require("./main.router");
 // instanciar a classe Server
 const server = new server_1.Server();
 /* Invocar o método "bootstrap", que está na classe "Server"
@@ -11,7 +12,8 @@ const server = new server_1.Server();
    respectivas classes, como ocorre com a classe UsersRouters. */
 server.bootstrap([
     users_router_1.usersRouter,
-    units_router_1.unitsRouter
+    units_router_1.unitsRouter,
+    main_router_1.mainRouter
 ]).then(server => {
     console.log('Server is listening on:', server.application.address());
 }).catch(error => {

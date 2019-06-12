@@ -50,6 +50,8 @@ class Server {
                    método PATCH seja "aplication/merge-patch+json",
                    conforme recomenda a especificação */
                 this.application.use(merge_patch_parser_1.mergePatchBodyParser);
+                /* todos os requests passarão pelo crivo
+                   do método "tokenParser", em toda a aplicação */
                 this.application.use(token_parser_1.tokenParser);
                 // constante que pegará o ip local
                 const ip = require('ip');

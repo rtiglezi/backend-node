@@ -1,8 +1,8 @@
-import { ModelRouter } from './../common/model.router'
+import { ModelRouter } from '../../common/model.router'
 import * as restify from 'restify'
 import { Unit } from './units.model'
 
-import { authorize } from './../security/authz.handler';
+import { authorize } from '../../security/authz.handler';
 
 
 class UnitsRouter extends ModelRouter<Unit> {

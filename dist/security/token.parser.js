@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const jwt = require("jsonwebtoken");
-const users_model_1 = require("../users/users.model");
+const users_model_1 = require("../resources/users/users.model");
 const environment_1 = require("../common/environment");
 exports.tokenParser = (req, resp, next) => {
     const token = extractToken(req);

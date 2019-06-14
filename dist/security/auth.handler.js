@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const jwt = require("jsonwebtoken");
 const restify_errors_1 = require("restify-errors");
-const users_model_1 = require("../users/users.model");
+const users_model_1 = require("../resources/users/users.model");
 const environment_1 = require("../common/environment");
 exports.authenticate = (req, resp, next) => {
     const { email, password } = req.body;

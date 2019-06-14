@@ -13,6 +13,10 @@ export const environment = {
         certificate: process.env.CERT_FILE || './security/keys/cert.pem',
         key: process.env.CERT_KEY_FILE || './security/keys/key.pem',
         apiSendGridSecret: process.env.SENDGRID_API_KEY || 'segredodaapidosendgrid' 
+    },
+    log: {
+        level: process.env.LOG_LEVEL || 'debug',
+        name: 'e-proc-api-logger'
     }
 }
 

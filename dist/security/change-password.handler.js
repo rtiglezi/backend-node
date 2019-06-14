@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const users_model_1 = require("../users/users.model");
+const users_model_1 = require("../resources/users/users.model");
 const restify_errors_1 = require("restify-errors");
 exports.changePassword = (req, resp, next) => {
     const { password, newPassword } = req.body;

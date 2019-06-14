@@ -6,8 +6,8 @@ import { environment } from '../common/environment';
 import { Router } from '../common/router'
 import { mergePatchBodyParser } from './merge-patch.parser';
 import { handleError } from './error.hander';
-
 import {tokenParser} from '../security/token.parser'
+import { logger } from './../common/logger';
 
 
 export class Server {
@@ -31,7 +31,8 @@ export class Server {
 
                 const options: restify.ServerOptions = {
                     name: 'e-Proc',
-                    version: '1.0.0'
+                    version: '1.0.0',
+                    log: logger
                 }
                 
                 /* informações para utilizar HTTPS
@@ -43,6 +44,12 @@ export class Server {
 
                 // criando o servidor e passando as informações sobre a aplicação
                 this.application = restify.createServer(options)
+
+
+                this.application.pre(restify.plugins.requestLogger({
+                    log: logger
+                }))
+                
                
                 /* definir qual será a porta que será ouvida
                   para chamar a aplicacao */
@@ -53,6 +60,7 @@ export class Server {
                 /* registrar um evento para tratamento centralizado
                    dos erros */
                 this.application.on('restifyError', handleError)
+
 
                 /* configurar as queries que serão enviadas via get na url
                    para serem mostradas em formato json */

@@ -9,6 +9,8 @@ import { NotFoundError } from 'restify-errors';
    Cada recurso que tivermos na aplicação herdará 
    esta classe para organizar suas rotas.*/
 export abstract class Router extends EventEmitter {
+    
+    // recebe uma instância do servidor
     abstract applyRoutes(application: restify.Server)
 
     // método para aplicar hypermedia nos endpoints que trafegam documentos

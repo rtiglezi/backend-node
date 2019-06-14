@@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const router_1 = require("./router");
 const mongoose = require("mongoose");
 const restify_errors_1 = require("restify-errors");
+/* A classe receberá um modelo genérico, que será enviado
+   em runtime (User, Unit etc...), por isso está sendo informado
+   o modelo denominado "D" */
 class ModelRouter extends router_1.Router {
     constructor(model) {
         super();
@@ -23,7 +26,7 @@ class ModelRouter extends router_1.Router {
             let page = parseInt(req.query._page || 1);
             page = page > 0 ? page : 1;
             const skip = (page - 1) * this.pageSize;
-            this.model
+            this.model // equivale ao model passado em runtime, como o User por exemplo
                 .count({})
                 .exec()
                 .then(count => this.model.find()

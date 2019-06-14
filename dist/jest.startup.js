@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const jestCli = require("jest-cli");
 const server_1 = require("./server/server");
 const environment_1 = require("./common/environment");
-const users_router_1 = require("./users/users.router");
-const users_model_1 = require("./users/users.model");
+const users_router_1 = require("./resources/users/users.router");
+const users_model_1 = require("./resources/users/users.model");
 let server;
 const beforeAllTests = () => {
     environment_1.environment.db.url = process.env.DB_URL || 'mongodb://localhost/e-proc-test-db';

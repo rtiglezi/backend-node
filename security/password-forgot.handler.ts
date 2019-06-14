@@ -1,10 +1,11 @@
 import * as restify from 'restify'
-import { User } from '../users/users.model'
+import * as jwt from 'jsonwebtoken'
+import * as bcrypt from 'bcrypt'
+
+import { User } from '../resources/users/users.model'
 import { NotFoundError } from 'restify-errors'
 
-import * as bcrypt from 'bcrypt'
-import { environment } from './../common/environment';
-import * as jwt from 'jsonwebtoken'
+import { environment } from '../common/environment';
 import { sendMail } from '../common/sendGridEmail';
 
 

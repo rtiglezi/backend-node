@@ -1,8 +1,10 @@
 import * as mongoose from 'mongoose'
-import { validateCPF } from '../common/validators'
 import * as bcrypt from 'bcrypt'
-import { environment } from './../common/environment';
+
 import { Unit } from '../units/units.model';
+
+import { validateCPF } from '../../common/validators'
+import { environment } from '../../common/environment';
 
 
 /* interface para representar o documento,
@@ -78,6 +80,20 @@ const userSchema = new mongoose.Schema({
     }
 })
 
+/* Middlwares do MongoDB:
+   de documento:
+     - init 
+     - validate 
+     - save 
+     - remove
+   de query-model:
+     - count()
+     - find ()
+     - findOne ()
+     - findOneAndUpdate()
+     - findOneAndRemove()
+     - update() */ 
+
 userSchema.statics.findByEmail = function (email: string, projection: string) {
     return this.findOne({ email }, projection) //{email: email}
 }
@@ -100,7 +116,7 @@ const hashPassword = (obj, next) => {
 }
 
 const saveMiddleware = function (next) {
-    const user: User = this
+    const user: User = this // como é uma middleware de documento, "this" é o próprio documento
     console.log(user)
     if (!user.isModified('password')) {
         next()
@@ -110,7 +126,7 @@ const saveMiddleware = function (next) {
 }
 
 const updateMiddleware = function (next) {
-    if (!this.getUpdate().password) {
+    if (!this.getUpdate().password) { // "this.getUpdate()" se refere ao objeto modificado 
         next()
     } else {
         hashPassword(this.getUpdate(), next)

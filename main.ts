@@ -1,6 +1,6 @@
 import { Server } from './server/server'
-import { usersRouter } from './users/users.router';
-import { unitsRouter } from './units/units.router';
+import { usersRouter } from './resources/users/users.router';
+import { unitsRouter } from './resources/units/units.router';
 import { mainRouter } from './main.router';
 
 // instanciar a classe Server

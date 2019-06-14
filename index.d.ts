@@ -1,4 +1,4 @@
-import {User} from './users/users.model'
+import {User} from './resources/users/users.model'
 
 declare module 'restify' {
   // exporta novamente a interface Request, adicionando a propriedade

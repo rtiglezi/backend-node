@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const server_1 = require("./server/server");
-const users_router_1 = require("./users/users.router");
-const units_router_1 = require("./units/units.router");
+const users_router_1 = require("./resources/users/users.router");
+const units_router_1 = require("./resources/units/units.router");
 const main_router_1 = require("./main.router");
 // instanciar a classe Server
 const server = new server_1.Server();

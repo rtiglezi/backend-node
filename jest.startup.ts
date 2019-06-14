@@ -2,8 +2,8 @@ import * as jestCli from 'jest-cli'
 
 import {Server} from './server/server'
 import {environment} from './common/environment'
-import {usersRouter} from './users/users.router'
-import {User} from './users/users.model'
+import {usersRouter} from './resources/users/users.router'
+import {User} from './resources/users/users.model'
 
 let server: Server
 const beforeAllTests = ()=>{

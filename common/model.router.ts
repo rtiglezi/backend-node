@@ -2,6 +2,9 @@ import { Router } from './router'
 import * as mongoose from 'mongoose'
 import { NotFoundError } from 'restify-errors'
 
+/* A classe receberá um modelo genérico, que será enviado
+   em runtime (User, Unit etc...), por isso está sendo informado
+   o modelo denominado "D" */
 export abstract class ModelRouter<D extends mongoose.Document> extends Router {
 
     basePath: string
@@ -63,7 +66,7 @@ export abstract class ModelRouter<D extends mongoose.Document> extends Router {
         let page = parseInt(req.query._page || 1)
         page = page > 0 ? page : 1
         const skip = (page - 1) * this.pageSize
-        this.model
+        this.model // equivale ao model passado em runtime, como o User por exemplo
             .count({})
             .exec()
             .then(count => this.model.find()

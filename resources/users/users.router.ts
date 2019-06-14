@@ -1,11 +1,11 @@
-import { ModelRouter } from './../common/model.router'
 import * as restify from 'restify'
 import { User } from './users.model'
-import { authenticate } from '../security/auth.handler'
-import { authorize } from './../security/authz.handler';
-import { changePassword } from '../security/change-password.handler';
-import { forgotPassword } from '../security/forgot-password.handler';
-import { resetPassword } from '../security/reset-password.handler';
+import { ModelRouter } from '../../common/model.router'
+import { authenticate } from '../../security/auth.handler'
+import { authorize } from '../../security/authz.handler';
+import { changePassword } from '../../security/password-change.handler';
+import { forgotPassword } from '../../security/password-forgot.handler';
+import { resetPassword } from '../../security/password-reset.handler';
 
 
 class UsersRouter extends ModelRouter<User> {
@@ -53,9 +53,12 @@ class UsersRouter extends ModelRouter<User> {
     application.put(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.replace])
     application.patch(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.update])
     application.del(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.delete])
-    // rotas para controle de acesso
+    // rota para controle de acesso
     application.post(`${this.basePath}/authenticate`, authenticate)
-    application.patch(`${this.basePath}/:id/changepass`, [authorize('user'), this.validateId, changePassword, this.update])
+    application.patch(`${this.basePath}/:id/changepass`, [ authorize('user'), 
+                                                           this.validateId, 
+                                                           changePassword, 
+                                                           this.update ])
     application.post(`${this.basePath}/forgotpass`, forgotPassword)
     application.post(`${this.basePath}/resetpass`, resetPassword)
   }

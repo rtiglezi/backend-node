@@ -1,9 +1,9 @@
 import * as restify from 'restify'
-import { User } from '../users/users.model'
-import { NotAuthorizedError, BadRequestError, NotFoundError } from 'restify-errors';
+import { User } from '../resources/users/users.model'
+import { NotAuthorizedError, BadRequestError } from 'restify-errors';
 import * as jwt from 'jsonwebtoken'
 import { environment } from '../common/environment'
-import { usersRouter } from '../users/users.router';
+import { usersRouter } from '../resources/users/users.router';
 
 export const resetPassword: restify.RequestHandler = (req, resp, next) => {
   const token = req.query.token

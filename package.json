@@ -12,7 +12,7 @@
   "jest": {
     "globals": {
       "address": "http://localhost:3001",
-      "auth": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.rlc_ZARjxrfz4-L1yCjUlVZrlRah9xvPi9RnVEzql6o"
+      "auth": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.7zlaHZwo5UKHW8qwUVWJg0mu6FbGKaD60a_tYUFyUg4"
     },
     "testEnvironment": "node",
     "transform": {

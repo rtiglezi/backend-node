@@ -15,7 +15,7 @@ export const authorize: (...profiles: string[]) => restify.RequestHandler = (...
         req.log.debug('Permission denied for %s. Required profiles: %j. User profiles: %j',
                        req.authenticated._id, profiles, req.authenticated.profiles)
       }
-      next(new ForbiddenError('Permission denied.'))
+      next(new ForbiddenError('Permission denied..'))
     }
   }
 }

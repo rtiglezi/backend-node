@@ -7,6 +7,7 @@ const environment_1 = require("../common/environment");
 const merge_patch_parser_1 = require("./merge-patch.parser");
 const error_hander_1 = require("./error.hander");
 const token_parser_1 = require("../security/token.parser");
+const logger_1 = require("./../common/logger");
 class Server {
     // método para iniciar o MongoDB
     initializeDb() {
@@ -22,7 +23,8 @@ class Server {
             try {
                 const options = {
                     name: 'e-Proc',
-                    version: '1.0.0'
+                    version: '1.0.0',
+                    log: logger_1.logger
                 };
                 /* informações para utilizar HTTPS
                 no ambiente interno, não o de produção */
@@ -32,6 +34,9 @@ class Server {
                 }
                 // criando o servidor e passando as informações sobre a aplicação
                 this.application = restify.createServer(options);
+                this.application.pre(restify.plugins.requestLogger({
+                    log: logger_1.logger
+                }));
                 /* definir qual será a porta que será ouvida
                   para chamar a aplicacao */
                 this.application.listen(environment_1.environment.server.port, () => {

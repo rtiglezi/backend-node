@@ -1,10 +1,8 @@
 import 'jest'
 import * as request from 'supertest'
 
-
-let address: string = (<any>global).address
-let auth: string = (<any>global).auth
-
+const address: string = (<any>global).address
+const auth: string = (<any>global).auth
 
 test('get /users', () => {
     return request(address)
@@ -21,26 +19,67 @@ test('post /users', () => {
         .post('/users')
         .set('Authorization', auth)
         .send({
-            name: 'Usuario de Teste',
-            email: 'uteste@teste.com.br',
-            login: 'usuario.teste',
+            name: 'usuario1',
+            email: 'usuario1@email.com',
+            login: 'usuario1.login',
             password: '12345678',
-            cpf: '962.116.531-82',
-            gender: 'Male'
+            cpf: '962.116.531-82'
         })
         .then(response => {
             expect(response.status).toBe(200)
             expect(response.body._id).toBeDefined()
-            expect(response.body.name).toBe('Usuario de Teste')
-            expect(response.body.email).toBe('uteste@teste.com.br')
-            expect(response.body.login).toBe('usuario.teste')
-            expect(response.body.password).toBeUndefined()
+            expect(response.body.name).toBe('usuario1')
+            expect(response.body.email).toBe('usuario1@email.com')
             expect(response.body.cpf).toBe('962.116.531-82')
-            expect(response.body.gender).toBe('Male')
+            expect(response.body.password).toBeUndefined()
         }).catch(fail)
 })
 
-test('get /users/aaaa - not found', () => {
+test('post /users - nome obrigatorio', () => {
+    return request(address)
+        .post('/users')
+        .set('Authorization', auth)
+        .send({
+            email: 'usuario2@email.com',
+            login: 'usuario2.login',
+            password: '12345678',
+            cpf: '675.028.852-93'
+        })
+        .then(response => {
+            expect(response.status).toBe(400)
+            expect(response.body.errors).toBeInstanceOf(Array)
+            expect(response.body.errors[0].message).toContain('name')
+        })
+        .catch(fail)
+})
+
+
+/* Primeiro cria-se um novo usuário.
+   Depois filtra-se por email na expectativa de retornar apenas
+   o que tiver o email identico.
+ */
+test('get /users - findByEmail', () => {
+    return request(address)
+        .post('/users')
+        .set('Authorization', auth)
+        .send({
+            name: 'usuario 3',
+            login: 'usuario2.login',
+            email: 'usuario3@email.com',
+            password: '12345678',
+        }).then(response => request(address)
+            .get('/users')
+            .set('Authorization', auth)
+            .query({ email: 'usuario3@email.com' }))
+        .then(response => {
+            expect(response.status).toBe(200)
+            expect(response.body.items).toBeInstanceOf(Array)
+            expect(response.body.items).toHaveLength(1)
+            expect(response.body.items[0].email).toBe('usuario3@email.com')
+        }).catch(fail)
+})
+
+test('get /users/aaaaa - not found', () => {
     return request(address)
         .get('/users/aaaaa')
         .set('Authorization', auth)
@@ -49,29 +88,207 @@ test('get /users/aaaa - not found', () => {
         }).catch(fail)
 })
 
+test('get /users/:id', () => {
+    return request(address)
+        .post('/users')
+        .set('Authorization', auth)
+        .send({
+            name: 'usuario 4',
+            login: 'usuario4.login',
+            email: 'user4@email.com',
+            password: '12345678',
+            cpf: '482.326.154-27'
+        }).then(response => request(address)
+            .get(`/users/${response.body._id}`).set('Authorization', auth))
+        .then(response => {
+            expect(response.status).toBe(200)
+            expect(response.body.name).toBe('usuario 4')
+            expect(response.body.email).toBe('user4@email.com')
+            expect(response.body.cpf).toBe('482.326.154-27')
+            expect(response.body.password).toBeUndefined()
+        }).catch(fail)
+})
+
+test('delete /users/aaaaa - not found', () => {
+    return request(address)
+        .delete(`/users/aaaaa`)
+        .set('Authorization', auth)
+        .then(response => {
+            expect(response.status).toBe(404)
+        }).catch(fail)
+})
+
+test('delete /users:/id', () => {
+    return request(address)
+        .post('/users')
+        .set('Authorization', auth)
+        .send({
+            name: 'usuario 5',
+            email: 'usuario5@email.com',
+            login: 'usuario5.login',
+            password: '12345678',
+            cpf: '187.638.581-26'
+        }).then(response => request(address)
+            .delete(`/users/${response.body._id}`)
+            .set('Authorization', auth))
+        .then(response => {
+            expect(response.status).toBe(204)
+        }).catch(fail)
+
+})
+
+test('patch /users/aaaaa - not found', () => {
+    return request(address)
+        .patch(`/users/aaaaa`)
+        .set('Authorization', auth)
+        .then(response => {
+            expect(response.status).toBe(404)
+        }).catch(fail)
+})
+
+test('post /users - cpf invalido', () => {
+    return request(address)
+        .post('/users')
+        .set('Authorization', auth)
+        .send({
+            name: 'usuario 6',
+            login: 'usuario6.login',
+            email: 'usuario6@email.com',
+            password: '12345678',
+            cpf: '675.028.222-93'
+        })
+        .then(response => {
+            expect(response.status).toBe(400)
+            expect(response.body.errors).toBeInstanceOf(Array)
+            expect(response.body.errors).toHaveLength(1)
+            expect(response.body.errors[0].message).toContain('Invalid CPF')
+        })
+        .catch(fail)
+})
+
+test('post /users - email duplicado', () => {
+    return request(address)
+        .post('/users')
+        .set('Authorization', auth)
+        .send({
+            name: 'Usuario Duplicado',
+            login: 'duplicado.login',
+            email: 'duplicado@teste.com.br',
+            password: '12345678',
+            cpf: '593.436.344-12'
+        }).then(response =>
+            request(address)
+                .post('/users')
+                .set('Authorization', auth)
+                .send({
+                    name: 'Usuario Duplicado',
+                    login: 'duplicado.login',
+                    email: 'duplicado@teste.com.br',
+                    password: '12345678',
+                    cpf: '593.436.344-12'
+                }))
+        .then(response => {
+            expect(response.status).toBe(400)
+            expect(response.body.message).toContain('E11000 duplicate key')
+        })
+        .catch(fail)
+})
+
+
+
 test('patch /users/:id', () => {
     return request(address)
         .post('/users')
         .set('Authorization', auth)
         .send({
-            name: 'usuario2',
-            email: 'usuario2@email.com',
-            login: 'usuario.dois',
+            name: 'usuario7',
+            login: 'usuario7.login',
+            email: 'usuario7@email.com',
             password: '12345678'
         })
         .then(response => request(address)
             .patch(`/users/${response.body._id}`)
             .set('Authorization', auth)
             .send({
-                name: 'usuario2 - patch'
+                name: 'usuario7 - patch'
             }))
         .then(response => {
             expect(response.status).toBe(200)
             expect(response.body._id).toBeDefined()
-            expect(response.body.name).toBe('usuario2 - patch')
-            expect(response.body.email).toBe('usuario2@email.com')
+            expect(response.body.name).toBe('usuario7 - patch')
+            expect(response.body.email).toBe('usuario7@email.com')
             expect(response.body.password).toBeUndefined()
         })
         .catch(fail)
 })
 
+test('put /users/aaaaa - not found', () => {
+    return request(address)
+        .put(`/users/aaaaa`)
+        .set('Authorization', auth)
+        .then(response => {
+            expect(response.status).toBe(404)
+        }).catch(fail)
+})
+
+/*
+  1. Cria-se um usuario com gender Male
+  2. Atualiza, mas nao informa gender
+  3. Testa se o documento foi substituido -> gender undefined
+*/
+test('put /users:/id', () => {
+    return request(address)
+        .post('/users')
+        .set('Authorization', auth)
+        .send({
+            name: 'usuario 8',
+            login: 'usuario8.login',
+            email: 'usuario8@email.com',
+            password: '12345678',
+            cpf: '613.586.318-59',
+            gender: 'Male'
+        }).then(response => request(address)
+            .put(`/users/${response.body._id}`)
+            .set('Authorization', auth)
+            .send({
+                name: 'usuario 8',
+                login: 'usuario8.login',
+                email: 'usuario8@email.com',
+                password: '12345678',
+                cpf: '613.586.318-59'
+            }))
+        .then(response => {
+            expect(response.status).toBe(200)
+            expect(response.body.name).toBe('usuario 8')
+            expect(response.body.email).toBe('usuario8@email.com')
+            expect(response.body.cpf).toBe('613.586.318-59')
+            expect(response.body.gender).toBeUndefined()
+            expect(response.body.password).toBeUndefined()
+        }).catch(fail)
+
+})
+
+test('authenticate user - not authorized', () => {
+    return request(address)
+        .post('/users/authenticate')
+        .send({
+            email: "admin@email.com",
+            password: "123456"
+        })
+        .then(response => {
+            expect(response.status).toBe(403)
+        }).catch(fail)
+})
+
+test('authenticate user', () => {
+    return request(address)
+        .post('/users/authenticate')
+        .send({
+            email: "admin@email.com",
+            password: "12345678"
+        })
+        .then(response => {
+            expect(response.status).toBe(200)
+            expect(response.body.accessToken).toBeDefined()
+        }).catch(fail)
+})

@@ -28,9 +28,9 @@ export const forgotPassword: restify.RequestHandler = (req, resp, next) => {
           let txt  = `Olá, ${user.name}. Realize sua troca de senha.`
             let tag = `
             Olá, ${user.name}.<br/>
-            Conforme sua solicitação, segue link para realizar a troca de sua senha.<br/>
+            Conforme sua solicitação, segue o link para realizar a redefinição de sua senha:<br/>
             <br/>
-            <a href='http://localhost:3000/users/resetpass?token=${token}'>Clique aqui para alterar sua senha.</a>
+            <a href='http://frontend/password/reset/${token}'>Clique aqui para redefinir sua senha.</a>
             `
     
             sendMail(user.email, sbj, txt, tag)

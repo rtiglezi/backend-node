@@ -3,9 +3,9 @@ import { User } from './users.model'
 import { ModelRouter } from '../../common/model.router'
 import { authenticate } from '../../security/auth.handler'
 import { authorize } from '../../security/authz.handler';
-import { changePassword } from '../../security/password-change.handler';
-import { forgotPassword } from '../../security/password-forgot.handler';
-import { resetPassword } from '../../security/password-reset.handler';
+import { changePassword } from '../../security/change-password.handler';
+import { forgotPassword } from '../../security/forgot-password.handler';
+import { resetPassword } from '../../security/reset-password.handler';
 
 
 class UsersRouter extends ModelRouter<User> {
@@ -60,7 +60,7 @@ class UsersRouter extends ModelRouter<User> {
                                                            changePassword, 
                                                            this.update ])
     application.post(`${this.basePath}/forgotpass`, forgotPassword)
-    application.post(`${this.basePath}/resetpass`, resetPassword)
+    application.post(`${this.basePath}/resetpass/:token`, resetPassword)
   }
 
 }

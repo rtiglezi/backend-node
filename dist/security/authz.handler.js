@@ -11,7 +11,7 @@ exports.authorize = (...profiles) => {
             if (req.authenticated) {
                 req.log.debug('Permission denied for %s. Required profiles: %j. User profiles: %j', req.authenticated._id, profiles, req.authenticated.profiles);
             }
-            next(new restify_errors_1.ForbiddenError('Permission denied.'));
+            next(new restify_errors_1.ForbiddenError('Permission denied..'));
         }
     };
 };

@@ -76,7 +76,7 @@ class RequestsRouter extends ModelRouter<Request> {
 
 
     applyRoutes(application: restify.Server) {
-        application.get(`${this.basePath}`, [authorize('admin, user'), this.findAll])
+        application.get(`${this.basePath}`, [authorize('admin', 'user'), this.findAll])
         application.get(`${this.basePath}/:id`, [authorize('admin', 'user'), this.validateId, this.findById])
         application.post(`${this.basePath}`, [authorize('admin'), this.save])
         application.put(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.replace])

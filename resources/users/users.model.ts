@@ -18,6 +18,7 @@ export interface User extends mongoose.Document {
     gender: string,
     cpf: string,
     allowedUnit: [mongoose.Types.ObjectId | Unit],
+    lastUnit: mongoose.Types.ObjectId | Unit,
     profiles: string[],
     matches(password: string): boolean,
     hasAny(...profiles: string[]): boolean
@@ -74,6 +75,11 @@ const userSchema = new mongoose.Schema({
         ref: 'Unit',
         required: false
     }],
+    lastUnit: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Unit',
+        required: false
+    },
     profiles :{
         type: [String],
         required: false

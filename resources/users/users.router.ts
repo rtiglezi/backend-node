@@ -4,8 +4,11 @@ import { ModelRouter } from '../../common/model.router'
 import { authenticate } from '../../security/auth.handler'
 import { authorize } from '../../security/authz.handler';
 import { changePassword } from '../../security/change-password.handler';
-import { forgotPassword } from '../../security/forgot-password.handler';
-import { resetPassword } from '../../security/reset-password.handler';
+import { forgotPassword } from '../../security/forgot-password';
+import { resetPassword } from '../../security/reset-password';
+import { resetPasswordForm } from '../../security/reset-password-form';
+import { usersLastUnit } from './users.last-unit.handler';
+import { checkOwner } from '../../security/check-owner.handler';
 
 
 class UsersRouter extends ModelRouter<User> {
@@ -53,14 +56,25 @@ class UsersRouter extends ModelRouter<User> {
     application.put(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.replace])
     application.patch(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.update])
     application.del(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.delete])
-    // rota para controle de acesso
+
+    application.patch(`${this.basePath}/:id/lastunit`, [authorize('user'), 
+                                                        this.validateId,
+                                                        checkOwner, 
+                                                        usersLastUnit,
+                                                        this.update])
+    
+    // rotas para controle de acesso
     application.post(`${this.basePath}/authenticate`, authenticate)
+
     application.patch(`${this.basePath}/:id/changepass`, [ authorize('user'), 
-                                                           this.validateId, 
+                                                           this.validateId,
+                                                           checkOwner, 
                                                            changePassword, 
                                                            this.update ])
+    
     application.post(`${this.basePath}/forgotpass`, forgotPassword)
-    application.post(`${this.basePath}/resetpass/:token`, resetPassword)
+    application.get(`${this.basePath}/resetpass/form/:token/:linkFront`, resetPasswordForm)
+    application.post(`${this.basePath}/resetpass/:token/:linkFront`, resetPassword)
   }
 
 }

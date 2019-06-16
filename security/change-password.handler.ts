@@ -1,18 +1,15 @@
 import * as restify from 'restify'
 import { User } from '../resources/users/users.model'
-import { ForbiddenError, NotAuthorizedError, BadRequestError } from 'restify-errors';
+import { NotAuthorizedError, BadRequestError } from 'restify-errors';
 
 export const changePassword: restify.RequestHandler = (req, resp, next) => {
   const { password, newPassword } = req.body
 
-  if (req.authenticated.id != req.params.id)
-    return next(new ForbiddenError('Permission denied'))
-
   User.findByEmail(req.authenticated.email, '+password')
     .then(user => {
-
-      if (!password || !user)
-        return next(new NotAuthorizedError('Invalid credentials.'))
+      
+      if (!password)
+        return next(new BadRequestError('Password is required.'))
 
       if (!user.matches(password))
         return next(new NotAuthorizedError('Password is not correct.'))
@@ -21,14 +18,14 @@ export const changePassword: restify.RequestHandler = (req, resp, next) => {
         return next(new BadRequestError('New password is required.'))
 
       if (newPassword === password)
-        return next(new BadRequestError('New password has to be different from current password.'))
+        return next(new BadRequestError('New password must to be different from current password.'))
 
       if (newPassword.length < 8)
-        return next(new BadRequestError('Password has to be at least 8 caracters.'))
+        return next(new BadRequestError('Password must to be at least 8 characters.'))
 
       req.body = { password: newPassword }
       return next()
 
-    })
+    }).catch(err => { next(err) })
 
 }

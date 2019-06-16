@@ -2,6 +2,7 @@ import { Server } from './server/server'
 import { usersRouter } from './resources/users/users.router';
 import { unitsRouter } from './resources/units/units.router';
 import { mainRouter } from './main.router';
+import { requestsRouter } from './resources/requests/requests.router';
 
 // instanciar a classe Server
 const server = new Server()
@@ -13,6 +14,7 @@ const server = new Server()
 server.bootstrap([
     usersRouter,
     unitsRouter,
+    requestsRouter,
     mainRouter
 ]).then(server => {
     console.log('Server is listening on:', server.application.address())

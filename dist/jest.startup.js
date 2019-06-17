@@ -1,5 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const divisions_model_1 = require("./resources/divisions/divisions.model");
+const divisions_router_1 = require("./resources/divisions/divisions.router");
 const jestCli = require("jest-cli");
 const server_1 = require("./server/server");
 const environment_1 = require("./common/environment");
@@ -11,8 +13,10 @@ const beforeAllTests = () => {
     environment_1.environment.server.port = process.env.SERVER_PORT || 3001;
     server = new server_1.Server();
     return server.bootstrap([
-        users_router_1.usersRouter
+        users_router_1.usersRouter,
+        divisions_router_1.divisionsRouter
     ])
+        .then(() => divisions_model_1.Division.remove({}).exec())
         .then(() => users_model_1.User.remove({}).exec())
         .then(() => {
         let admin = new users_model_1.User();

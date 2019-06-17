@@ -12,7 +12,7 @@ class DivisionsRouter extends ModelRouter<Division> {
     }
 
     applyRoutes(application: restify.Server) {
-        application.get(`${this.basePath}`, [authorize('admin'), this.findAll])
+        application.get(`${this.basePath}`, [this.findAll])
         application.get(`${this.basePath}/:id`, [authorize('user'), this.validateId, this.findById])
         application.post(`${this.basePath}`, [authorize('admin'), this.save])
         application.put(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.replace])

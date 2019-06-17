@@ -1,3 +1,5 @@
+import { Division } from './resources/divisions/divisions.model';
+import { divisionsRouter } from './resources/divisions/divisions.router';
 import * as jestCli from 'jest-cli'
 
 import {Server} from './server/server'
@@ -11,8 +13,10 @@ const beforeAllTests = ()=>{
   environment.server.port = process.env.SERVER_PORT || 3001
   server = new Server()
   return server.bootstrap([
-    usersRouter
+    usersRouter,
+    divisionsRouter
   ])
+  .then(()=>Division.remove({}).exec())
   .then(()=>User.remove({}).exec())
   .then(()=>{
     let admin = new User()

@@ -56,12 +56,6 @@ class UsersRouter extends ModelRouter<User> {
     application.put(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.replace])
     application.patch(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.update])
     application.del(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.delete])
-
-    application.patch(`${this.basePath}/:id/lastdivision`, [authorize('user'), 
-                                                        this.validateId,
-                                                        checkOwner, 
-                                                        usersLastDivision,
-                                                        this.update])
     
     // rotas para controle de acesso
     application.post(`${this.basePath}/authenticate`, authenticate)
@@ -75,6 +69,13 @@ class UsersRouter extends ModelRouter<User> {
     application.post(`${this.basePath}/forgotpass`, forgotPassword)
     application.get(`${this.basePath}/resetpass/form/:token/:linkFront`, resetPasswordForm)
     application.post(`${this.basePath}/resetpass/:token/:linkFront`, resetPassword)
+
+    application.patch(`${this.basePath}/:id/lastdivision`, [authorize('user'), 
+    this.validateId,
+    checkOwner, 
+    usersLastDivision,
+    this.update])
+
   }
 
 }

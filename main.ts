@@ -1,6 +1,6 @@
 import { Server } from './server/server'
 import { usersRouter } from './resources/users/users.router';
-import { unitsRouter } from './resources/units/units.router';
+import { divisionsRouter } from './resources/divisions/divisions.router';
 import { mainRouter } from './main.router';
 import { requestsRouter } from './resources/requests/requests.router';
 
@@ -13,7 +13,7 @@ const server = new Server()
    respectivas classes, como ocorre com a classe UsersRouters. */
 server.bootstrap([
     usersRouter,
-    unitsRouter,
+    divisionsRouter,
     requestsRouter,
     mainRouter
 ]).then(server => {

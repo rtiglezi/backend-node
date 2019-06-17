@@ -1,14 +1,14 @@
 import { ModelRouter } from '../../common/model.router'
 import * as restify from 'restify'
-import { Unit } from './units.model'
+import { Division } from './divisions.model'
 
 import { authorize } from '../../security/authz.handler';
 
 
-class UnitsRouter extends ModelRouter<Unit> {
+class DivisionsRouter extends ModelRouter<Division> {
 
     constructor() {
-        super(Unit)
+        super(Division)
     }
 
     applyRoutes(application: restify.Server) {
@@ -21,4 +21,4 @@ class UnitsRouter extends ModelRouter<Unit> {
     }
 }
 
-export const unitsRouter = new UnitsRouter()
+export const divisionsRouter = new DivisionsRouter()

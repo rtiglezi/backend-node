@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const server_1 = require("./server/server");
 const users_router_1 = require("./resources/users/users.router");
-const units_router_1 = require("./resources/units/units.router");
+const divisions_router_1 = require("./resources/divisions/divisions.router");
 const main_router_1 = require("./main.router");
 const requests_router_1 = require("./resources/requests/requests.router");
 // instanciar a classe Server
@@ -13,7 +13,7 @@ const server = new server_1.Server();
    respectivas classes, como ocorre com a classe UsersRouters. */
 server.bootstrap([
     users_router_1.usersRouter,
-    units_router_1.unitsRouter,
+    divisions_router_1.divisionsRouter,
     requests_router_1.requestsRouter,
     main_router_1.mainRouter
 ]).then(server => {

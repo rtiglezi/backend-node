@@ -7,7 +7,7 @@ import { changePassword } from '../../security/change-password.handler';
 import { forgotPassword } from '../../security/forgot-password';
 import { resetPassword } from '../../security/reset-password';
 import { resetPasswordForm } from '../../security/reset-password-form';
-import { usersLastUnit } from './users.last-unit.handler';
+import { usersLastDivision } from './users.last-division.handler';
 import { checkOwner } from '../../security/check-owner.handler';
 
 
@@ -28,7 +28,7 @@ class UsersRouter extends ModelRouter<User> {
 
   // findById = (req, resp, next) => {
   //     this.model.findById(req.params.id)
-  //               .populate("unit", "name")
+  //               .populate("division", "name")
   //               .then(this.render(resp,next))
   //               .catch(next)
   // }
@@ -57,10 +57,10 @@ class UsersRouter extends ModelRouter<User> {
     application.patch(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.update])
     application.del(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.delete])
 
-    application.patch(`${this.basePath}/:id/lastunit`, [authorize('user'), 
+    application.patch(`${this.basePath}/:id/lastdivision`, [authorize('user'), 
                                                         this.validateId,
                                                         checkOwner, 
-                                                        usersLastUnit,
+                                                        usersLastDivision,
                                                         this.update])
     
     // rotas para controle de acesso

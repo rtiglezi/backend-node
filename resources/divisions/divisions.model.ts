@@ -1,13 +1,13 @@
 import * as mongoose from 'mongoose'
 import {User} from '../users/users.model'
 
-export interface Unit extends mongoose.Document {
+export interface Division extends mongoose.Document {
     name: string,
     allowedUser: [mongoose.Types.ObjectId | User]
 }
 
 
-const unitSchema = new mongoose.Schema({
+const divisionSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -20,4 +20,4 @@ const unitSchema = new mongoose.Schema({
     }]
 })
 
-export const Unit = mongoose.model<Unit>('Unit', unitSchema)
+export const Division = mongoose.model<Division>('Division', divisionSchema)

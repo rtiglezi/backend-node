@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose'
 import * as bcrypt from 'bcrypt'
 
-import { Unit } from '../units/units.model';
+import { Division } from '../divisions/divisions.model';
 
 import { validateCPF } from '../../common/validators'
 import { environment } from '../../common/environment';
@@ -17,8 +17,8 @@ export interface User extends mongoose.Document {
     password: string,
     gender: string,
     cpf: string,
-    allowedUnit: [mongoose.Types.ObjectId | Unit],
-    lastUnit: mongoose.Types.ObjectId | Unit,
+    allowedDivision: [mongoose.Types.ObjectId | Division],
+    lastDivision: mongoose.Types.ObjectId | Division,
     profiles: string[],
     matches(password: string): boolean,
     hasAny(...profiles: string[]): boolean
@@ -70,14 +70,14 @@ const userSchema = new mongoose.Schema({
             message: '{PATH}: Invalid CPF ({VALUE})'
         }
     },
-    allowedUnit: [{
+    allowedDivision: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Unit',
+        ref: 'Division',
         required: false
     }],
-    lastUnit: {
+    lastDivision: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Unit',
+        ref: 'Division',
         required: false
     },
     profiles :{

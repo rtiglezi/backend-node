@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const restify = require("restify");
 const mongoose = require("mongoose");
 const fs = require("fs");
+const corsMiddleware = require("restify-cors-middleware");
 const environment_1 = require("../common/environment");
 const merge_patch_parser_1 = require("./merge-patch.parser");
 const error_hander_1 = require("./error.hander");
@@ -34,6 +35,16 @@ class Server {
                 }
                 // criando o servidor e passando as informações sobre a aplicação
                 this.application = restify.createServer(options);
+                // configuração de CORS
+                const corsOptions = {
+                    preflightMaxAge: 10,
+                    origins: ['http://localhost:4200', 'http://localhost:8081'],
+                    allowHeaders: ['authorization'],
+                    exposeHeaders: ['x-custom-header']
+                };
+                const cors = corsMiddleware(corsOptions);
+                this.application.pre(cors.preflight);
+                this.application.use(cors.actual);
                 this.application.pre(restify.plugins.requestLogger({
                     log: logger_1.logger
                 }));

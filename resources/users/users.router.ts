@@ -50,12 +50,12 @@ class UsersRouter extends ModelRouter<User> {
 
   applyRoutes(application: restify.Server) {
     // rotas para o CRUD de usuarios
-    application.get(`${this.basePath}`, [authorize('admin'), this.findByEmail, this.findAll])
+    application.get(`${this.basePath}`, [this.findByEmail, this.findAll])
     application.get(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.findById])
-    application.post(`${this.basePath}`, [authorize('admin'), this.save])
-    application.put(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.replace])
-    application.patch(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.update])
-    application.del(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.delete])
+    application.post(`${this.basePath}`, [ this.save])
+    application.put(`${this.basePath}/:id`, [this.validateId, this.replace])
+    application.patch(`${this.basePath}/:id`, [this.validateId, this.update])
+    application.del(`${this.basePath}/:id`, [this.validateId, this.delete])
     
     // rotas para controle de acesso
     application.post(`${this.basePath}/authenticate`, authenticate)

@@ -8,13 +8,14 @@ import { NotFoundError } from 'restify-errors'
 export abstract class ModelRouter<D extends mongoose.Document> extends Router {
 
     basePath: string
-    pageSize: number = 4
+    pageSize: number = 10
 
     constructor(protected model: mongoose.Model<D>) {
         super()
         this.basePath = `/${model.collection.name}`
     }
 
+    
     // Utilizado para hypermedia.
     // Faz uma cópia do documento e cria os links
     envelope(document: any): any {
@@ -50,7 +51,8 @@ export abstract class ModelRouter<D extends mongoose.Document> extends Router {
         }
         return resource
     }
-
+    
+    
     /* validação para identificar se o parâmetro
        passado via get corresponde a um id com 
        formato válido */

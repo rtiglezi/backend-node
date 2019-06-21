@@ -2,6 +2,8 @@ import * as restify from 'restify'
 import * as mongoose from 'mongoose'
 import * as fs from 'fs'
 
+import * as corsMiddleware from 'restify-cors-middleware'
+
 import { environment } from '../common/environment';
 import { Router } from '../common/router'
 import { mergePatchBodyParser } from './merge-patch.parser';
@@ -44,6 +46,18 @@ export class Server {
 
                 // criando o servidor e passando as informações sobre a aplicação
                 this.application = restify.createServer(options)
+
+
+                // configuração de CORS
+                const corsOptions: corsMiddleware.Options = {
+                    preflightMaxAge: 10,
+                    origins: ['http://localhost:4200', 'http://localhost:8081'],
+                    allowHeaders: ['authorization'],
+                    exposeHeaders: ['x-custom-header']
+                }
+                const cors: corsMiddleware.CorsMiddleware = corsMiddleware(corsOptions)
+                this.application.pre(cors.preflight)
+                this.application.use(cors.actual)
 
 
                 this.application.pre(restify.plugins.requestLogger({

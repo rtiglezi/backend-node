@@ -13,11 +13,10 @@ import { environment } from '../../common/environment';
 export interface User extends mongoose.Document {
     name: string,
     email: string,
-    login: string,
     password: string,
     gender: string,
     cpf: string,
-    allowedDivision: [mongoose.Types.ObjectId | Division],
+    allowedDivisions: [mongoose.Types.ObjectId | Division],
     lastDivision: mongoose.Types.ObjectId | Division,
     profiles: string[],
     matches(password: string): boolean,
@@ -44,17 +43,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         match: /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     },
-    login: {
-        type: String,
-        unique: true,
-        required: true,
-        maxlength: 30,
-        minlength: 10
-    },
     password: {
         type: String,
         select: false,
-        required: true,
+        required: false,
         minlength: 8
     },
     gender: {
@@ -70,7 +62,7 @@ const userSchema = new mongoose.Schema({
             message: '{PATH}: Invalid CPF ({VALUE})'
         }
     },
-    allowedDivision: [{
+    allowedDivisions: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Division',
         required: false

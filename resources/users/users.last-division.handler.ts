@@ -13,7 +13,7 @@ export const usersLastDivision = (req, resp, next) => {
 
     User.findById(id).then(user => {
 
-      if (user.allowedDivision.indexOf(lastDivision) == -1) {
+      if (user.allowedDivisions.indexOf(lastDivision) == -1) {
         next(new BadRequestError("User does not have permission for this Division."))
       } else {
         req.body.lastDivision = lastDivision

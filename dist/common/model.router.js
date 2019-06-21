@@ -10,7 +10,7 @@ class ModelRouter extends router_1.Router {
     constructor(model) {
         super();
         this.model = model;
-        this.pageSize = 4;
+        this.pageSize = 10;
         /* validação para identificar se o parâmetro
            passado via get corresponde a um id com
            formato válido */

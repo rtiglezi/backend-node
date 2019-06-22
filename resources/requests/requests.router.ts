@@ -1,12 +1,12 @@
 import { NotFoundError } from 'restify-errors';
-import { ModelRouter } from '../../common/model.router'
+import { ModelService } from '../../common/model.service'
 import * as restify from 'restify'
 import { Request } from './requests.model'
 
 import { authorize } from '../../security/authz.handler';
 
 
-class RequestsRouter extends ModelRouter<Request> {
+class RequestsRouter extends ModelService<Request> {
 
     constructor() {
         super(Request)

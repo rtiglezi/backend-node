@@ -13,6 +13,7 @@ import { environment } from '../../common/environment';
 export interface User extends mongoose.Document {
     name: string,
     email: string,
+    login: string,
     password: string,
     gender: string,
     cpf: string,
@@ -45,9 +46,9 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        select: false,
         required: false,
-        minlength: 8
+        minlength: 8,
+        select: false
     },
     gender: {
         type: String,

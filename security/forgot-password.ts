@@ -9,7 +9,8 @@ import { sendMail } from '../common/sendGridEmail';
 
 
 export const forgotPassword = (req, resp, next) => {
-  const { email, linkFront } = req.body
+  
+  const { email, linkFront } = req.params
 
   User.findByEmail(email, '+password')
     .then(user => {

@@ -10,7 +10,7 @@ export const resetPasswordForm = (req, resp, next) => {
   if (token) {
     jwt.verify(token, environment.security.emailSecret, applyBearer(req, resp, next))
   } else {
-    next(new NotAuthorizedError('Token is and frontend link are required.'))
+    next(new NotAuthorizedError('Token and frontend link are required.'))
   }
 
 }

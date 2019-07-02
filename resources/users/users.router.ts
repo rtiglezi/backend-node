@@ -73,7 +73,7 @@ class UsersRouter extends ModelService<User>  {
       changePassword,
     this.update])
 
-    application.post(`${this.basePath}/forgotpass`, forgotPassword)
+    application.get(`${this.basePath}/forgotpass/:email/:linkFront`, forgotPassword)
     application.get(`${this.basePath}/resetpass/form/:token/:linkFront`, resetPasswordForm)
     application.post(`${this.basePath}/resetpass/:token/:linkFront`, resetPassword)
 

@@ -12,16 +12,15 @@ import { environment } from '../../common/environment';
    "autocomplete" e a detecção de erros */
 export interface User extends mongoose.Document {
     name: string,
-    email: string,
-    login: string,
-    password: string,
     gender: string,
     cpf: string,
-    allowedDivisions: [mongoose.Types.ObjectId | Division],
-    lastDivision: mongoose.Types.ObjectId | Division,
-    profiles: string[],
+    email: string,
+    password: string,
     matches(password: string): boolean,
-    hasAny(...profiles: string[]): boolean
+    profiles: string[],
+    hasAny(...profiles: string[]): boolean,
+    allowedDivisions: [mongoose.Types.ObjectId | Division],
+    lastDivision: mongoose.Types.ObjectId | Division
 }
 
 export interface UserModel extends mongoose.Model<User> {
@@ -38,18 +37,6 @@ const userSchema = new mongoose.Schema({
         maxlength: 80,
         minlength: 3
     },
-    email: {
-        type: String,
-        unique: true,
-        required: true,
-        match: /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    },
-    password: {
-        type: String,
-        required: false,
-        minlength: 8,
-        select: false
-    },
     gender: {
         type: String,
         required: false,
@@ -63,6 +50,22 @@ const userSchema = new mongoose.Schema({
             message: '{PATH}: Invalid CPF ({VALUE})'
         }
     },
+    email: {
+        type: String,
+        unique: true,
+        required: true,
+        match: /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    },
+    password: {
+        type: String,
+        required: false,
+        minlength: 8,
+        select: false
+    },
+    profiles: {
+        type: [String],
+        required: false
+    },
     allowedDivisions: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Division',
@@ -72,12 +75,14 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Division',
         required: false
-    },
-    profiles :{
-        type: [String],
-        required: false
     }
-})
+}, {
+        timestamps: {
+            createdAt: 'created_at',
+            updatedAt: 'updated_at'
+        }
+
+    })
 
 /* Middlwares do MongoDB:
    de documento:
@@ -91,7 +96,7 @@ const userSchema = new mongoose.Schema({
      - findOne ()
      - findOneAndUpdate()
      - findOneAndRemove()
-     - update() */ 
+     - update() */
 
 userSchema.statics.findByEmail = function (email: string, projection: string) {
     return this.findOne({ email }, projection) //{email: email}
@@ -125,6 +130,12 @@ const saveMiddleware = function (next) {
 }
 
 const updateMiddleware = function (next) {
+    
+    let date = new Date();
+    let timestamp = date.getTime();
+
+    this.getUpdate().updated_at = timestamp;
+    
     if (!this.getUpdate().password) { // "this.getUpdate()" se refere ao objeto modificado 
         next()
     } else {

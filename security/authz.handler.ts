@@ -1,8 +1,11 @@
+import { authenticate } from './auth.handler';
 import * as restify from 'restify'
 import { ForbiddenError } from 'restify-errors'
 
 export const authorize: (...profiles: string[]) => restify.RequestHandler = (...profiles) => {
   return (req, resp, next) => {
+    console.log("req.authenticated", req.authenticated)
+
     if (req.authenticated !== undefined && req.authenticated.hasAny(...profiles)) {
       req.log.debug('User %s is authorized with profiles %j on route %s. Required profiles %j',
          req.authenticated._id,

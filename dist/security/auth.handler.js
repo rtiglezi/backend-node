@@ -9,13 +9,13 @@ exports.authenticate = (req, resp, next) => {
     users_model_1.User.findByEmail(email, '+password')
         .then(user => {
         if (!user || !user.matches(password))
-            return next(new restify_errors_1.NotAuthorizedError('Invalid credentials'));
+            return next(new restify_errors_1.UnauthorizedError('Invalid credentials'));
         let payload = {
             sub: user.email,
             iss: 'e-proc-api'
         };
-        const token = jwt.sign(payload, environment_1.environment.security.apiSecret, { expiresIn: '10h' });
-        resp.json({ name: user.name, email: user.email, accessToken: token });
+        const token = jwt.sign(payload, environment_1.environment.security.apiSecret, { expiresIn: '8h' });
+        resp.json({ name: user.name, email: user.email, accessToken: token, profiles: user.profiles });
         return next(false);
     }).catch(next);
 };

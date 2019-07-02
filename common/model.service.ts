@@ -1,14 +1,16 @@
 import * as mongoose from 'mongoose'
 import { NotFoundError } from 'restify-errors'
+import { Router } from './router';
 
 /* A classe receberá um modelo genérico, que será enviado
    em runtime (User, Unit etc...), por isso está sendo informado
    o modelo denominado "D" */
-export abstract class ModelService<D extends mongoose.Document> {
+export abstract class ModelService<D extends mongoose.Document> extends Router {
 
     basePath: string
 
     constructor(protected model: mongoose.Model<D>) {
+        super()
         this.basePath = `/${model.collection.name}`
     }
 

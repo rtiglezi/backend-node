@@ -1,10 +1,12 @@
 import { Division } from './resources/divisions/divisions.model';
+
 import { divisionsRouter } from './resources/divisions/divisions.router';
+import { usersRouter } from './resources/users/users.router';
+
 import * as jestCli from 'jest-cli'
 
 import {Server} from './server/server'
 import {environment} from './common/environment'
-import {usersRouter} from './resources/users/users.router'
 import {User} from './resources/users/users.model'
 
 let server: Server
@@ -22,7 +24,6 @@ const beforeAllTests = ()=>{
     let admin = new User()
     admin.name = 'admin'
     admin.email = 'admin@email.com'
-    admin.login = 'admin.user'
     admin.password = '12345678'
     admin.profiles = ['admin', 'user']
     return admin.save()

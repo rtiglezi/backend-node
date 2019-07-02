@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const divisions_model_1 = require("./resources/divisions/divisions.model");
 const divisions_router_1 = require("./resources/divisions/divisions.router");
+const users_router_1 = require("./resources/users/users.router");
 const jestCli = require("jest-cli");
 const server_1 = require("./server/server");
 const environment_1 = require("./common/environment");
-const users_router_1 = require("./resources/users/users.router");
 const users_model_1 = require("./resources/users/users.model");
 let server;
 const beforeAllTests = () => {
@@ -22,7 +22,6 @@ const beforeAllTests = () => {
         let admin = new users_model_1.User();
         admin.name = 'admin';
         admin.email = 'admin@email.com';
-        admin.login = 'admin.user';
         admin.password = '12345678';
         admin.profiles = ['admin', 'user'];
         return admin.save();

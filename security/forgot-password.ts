@@ -35,9 +35,9 @@ export const forgotPassword = (req, resp, next) => {
             `
 
           sendMail(user.email, sbj, txt, tag)
-
-          resp.json({ linkBack, linkFront })
-
+        
+          resp.send(200, {msg: 'Mail sent.'});
+          
         }).catch(next)
     })
 

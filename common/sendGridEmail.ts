@@ -13,12 +13,11 @@ export const sendMail = (dest, sbj, txt, tag) => {
         subject:  sbj,
         text: txt,
         html: tag
-      };
-
-      console.log("ENVIO DE EMAILS DESATIVADO.")
-      console.log(msg)
+      };      
       
       sgMail.send(msg);
+      
 }
+
 
 

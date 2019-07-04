@@ -12,7 +12,7 @@ export const environment = {
         enableHTTPS: process.env.ENABLE_HTTPS || false,
         certificate: process.env.CERT_FILE || './security/keys/cert.pem',
         key: process.env.CERT_KEY_FILE || './security/keys/key.pem',
-        apiSendGridSecret: process.env.SENDGRID_API_KEY || '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'
+        apiSendGridSecret: process.env.SENDGRID_API_KEY || 'segredodosendgrid'
     },
     log: {
         level: process.env.LOG_LEVEL || 'debug',

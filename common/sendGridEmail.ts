@@ -4,18 +4,6 @@ import { environment } from './environment';
 
 export const sendMail = (dest, sbj, txt, tag) => {
 
-    const sgMail = require('@sendgrid/mail');
-    sgMail.setApiKey(environment.security.apiSendGridSecret);
-
-    const msg = {
-        to: dest,
-        from: 'ronaldotonioli@gmail.com',
-        subject:  sbj,
-        text: txt,
-        html: tag
-      };      
-      
-      sgMail.send(msg);
       
 }
 

@@ -5,11 +5,9 @@ import { User } from '../resources/users/users.model'
 import { NotFoundError } from 'restify-errors'
 
 import { environment } from '../common/environment';
-import { sendMail } from '../common/sendGridEmail';
-
 
 export const forgotPassword = (req, resp, next) => {
-  
+
   const { email, linkFront } = req.params
 
   User.findByEmail(email, '+password')
@@ -34,10 +32,28 @@ export const forgotPassword = (req, resp, next) => {
             <a href='http://localhost:3000/${linkBack}'>Clique aqui para redefinir sua senha.</a>
             `
 
-          sendMail(user.email, sbj, txt, tag)
-        
-          resp.send(200, {msg: 'Mail sent.'});
-          
+
+          const sgMail = require('@sendgrid/mail');
+          sgMail.setApiKey(environment.security.apiSendGridSecret);
+
+          const msg = {
+            to: user.email,
+            from: 'ronaldotonioli@gmail.com',
+            subject: sbj,
+            text: txt,
+            html: tag
+          };
+
+          let sentMail: boolean = false;
+
+          sgMail.send(msg)
+            .then(() => {
+              resp.send(200, { message: 'Mail sent.' });
+            })
+            .catch(error => {
+              resp.send(500, { message: 'Mail not sent.' });
+            })
+
         }).catch(next)
     })
 

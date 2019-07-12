@@ -12,6 +12,30 @@ class RequestsRouter extends ModelService<Request> {
         super(Request)
     }
 
+    findAll = (req, resp, next) => {
+        Request.aggregate([
+          {
+            $lookup:
+            {
+              from: "divisions",
+              localField: "allowedDivisions",
+              foreignField: "_id",
+              as: "allowedDivisionsDetails"
+            }
+          },
+          {
+            $project: {
+              password: 0
+            }
+          }
+        ])
+        .sort({name: 1})
+        .then(requests => {
+          resp.json(requests)
+        }).catch(next)
+      }
+
+
     findStages = (req, resp, next) => {
         Request.findById(req.params.id, "+stages")
             .then(rqst => {

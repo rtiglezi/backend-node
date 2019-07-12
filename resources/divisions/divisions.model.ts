@@ -1,5 +1,4 @@
 import * as mongoose from 'mongoose'
-import { User } from '../users/users.model'
 
 export interface Division extends mongoose.Document {
     name: string

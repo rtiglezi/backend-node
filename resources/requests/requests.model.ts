@@ -1,4 +1,7 @@
-import * as mongoose from 'mongoose'
+import { User } from './../users/users.model';
+import { Division } from './../divisions/divisions.model';
+import * as mongoose from 'mongoose';
+
 
 export interface Result extends mongoose.Document {
     name: string,
@@ -9,8 +12,9 @@ export interface Result extends mongoose.Document {
 export interface Stage extends mongoose.Document {
     name: string,
     position: number,
-    requiresAnalysis: boolean,
-    results: Result[]
+    results: Result[],
+    allowedDivisions: [mongoose.Types.ObjectId | Division],
+    allowedUsers: [mongoose.Types.ObjectId | User]
 }
 
 export interface Request extends mongoose.Document {
@@ -21,11 +25,12 @@ export interface Request extends mongoose.Document {
 const resultSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        required: false,
         unique: true
     },
     position: {
         type: Number,
+        required: false,
         unique: true
     },
     entailsConclusion: {
@@ -36,20 +41,25 @@ const resultSchema = new mongoose.Schema({
 const stageSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     position: {
-        type: Number,
-        unique: true
-    },
-    requiresAnalysis: {
-        type: Boolean
+        type: Number
     },
     results: {
         type: [resultSchema],
         required: false
-    } 
+    },
+    allowedDivisions: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Division',
+        required: false
+    }],
+    allowedUsers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: false
+    }]
 })
 
 const requestSchema = new mongoose.Schema({

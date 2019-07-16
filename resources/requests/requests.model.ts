@@ -18,6 +18,7 @@ export interface Stage extends mongoose.Document {
 }
 
 export interface Request extends mongoose.Document {
+    tenant_id: string,
     name: string,
     stages: Stage[]
 }
@@ -26,12 +27,10 @@ const resultSchema = new mongoose.Schema({
     name: {
         type: String,
         required: false,
-        unique: true
     },
     position: {
         type: Number,
         required: false,
-        unique: true
     },
     entailsConclusion: {
         type: Boolean
@@ -63,10 +62,13 @@ const stageSchema = new mongoose.Schema({
 })
 
 const requestSchema = new mongoose.Schema({
+    tenant_id: {
+        type: String,
+        required: true
+    },
     name: {
         type: String,
         required: true,
-        unique: true
     },
     stages: {
         type: [stageSchema],

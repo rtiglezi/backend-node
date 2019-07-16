@@ -3,6 +3,7 @@ import { usersRouter } from './resources/users/users.router';
 import { divisionsRouter } from './resources/divisions/divisions.router';
 import { mainRouter } from './main.router';
 import { requestsRouter } from './resources/requests/requests.router';
+import { tenantsRouter } from './resources/tenants/tenants.router';
 
 // instanciar a classe Server
 const server = new Server()
@@ -12,6 +13,7 @@ const server = new Server()
    das rotas à medida que elas forem sendo exportadas por suas
    respectivas classes, como ocorre com a classe UsersRouters. */
 server.bootstrap([
+    tenantsRouter,
     usersRouter,
     divisionsRouter,
     requestsRouter,

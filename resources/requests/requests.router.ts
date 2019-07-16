@@ -14,26 +14,31 @@ class RequestsRouter extends ModelService<Request> {
 
     findAll = (req, resp, next) => {
         Request.aggregate([
-          {
-            $lookup:
             {
-              from: "divisions",
-              localField: "allowedDivisions",
-              foreignField: "_id",
-              as: "allowedDivisionsDetails"
+                $match: {
+                    tenant_id: req.authenticated.tenant_id
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "divisions",
+                    localField: "allowedDivisions",
+                    foreignField: "_id",
+                    as: "allowedDivisionsDetails"
+                }
+            },
+            {
+                $project: {
+                    password: 0
+                }
             }
-          },
-          {
-            $project: {
-              password: 0
-            }
-          }
         ])
-        .sort({name: 1})
-        .then(requests => {
-          resp.json(requests)
-        }).catch(next)
-      }
+            .sort({ name: 1 })
+            .then(requests => {
+                resp.json(requests)
+            }).catch(next)
+    }
 
 
     findStages = (req, resp, next) => {
@@ -71,7 +76,7 @@ class RequestsRouter extends ModelService<Request> {
                 if (!rqst) {
                     throw new NotFoundError('Request not found.')
                 } else {
-                    rqst.stages.map(r=>{
+                    rqst.stages.map(r => {
                         resp.json(r.results)
                     })
                 }
@@ -84,8 +89,8 @@ class RequestsRouter extends ModelService<Request> {
                 if (!rqst) {
                     throw new NotFoundError('Request not found.')
                 } else {
-                    rqst.stages.map(r=>{
-                        
+                    rqst.stages.map(r => {
+
                         if (r._id === req.params.stId) {
 
                             r.results = req.body //ARRAY de estágios

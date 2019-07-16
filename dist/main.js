@@ -5,6 +5,7 @@ const users_router_1 = require("./resources/users/users.router");
 const divisions_router_1 = require("./resources/divisions/divisions.router");
 const main_router_1 = require("./main.router");
 const requests_router_1 = require("./resources/requests/requests.router");
+const tenants_router_1 = require("./resources/tenants/tenants.router");
 // instanciar a classe Server
 const server = new server_1.Server();
 /* Invocar o método "bootstrap", que está na classe "Server"
@@ -12,6 +13,7 @@ const server = new server_1.Server();
    das rotas à medida que elas forem sendo exportadas por suas
    respectivas classes, como ocorre com a classe UsersRouters. */
 server.bootstrap([
+    tenants_router_1.tenantsRouter,
     users_router_1.usersRouter,
     divisions_router_1.divisionsRouter,
     requests_router_1.requestsRouter,

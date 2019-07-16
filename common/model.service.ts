@@ -1,3 +1,4 @@
+
 import * as mongoose from 'mongoose'
 import { NotFoundError } from 'restify-errors'
 import { Router } from './router';
@@ -20,25 +21,43 @@ export abstract class ModelService<D extends mongoose.Document> extends Router {
        formato válido */
     validateId = (req, resp, next) => {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            next(new NotFoundError('Document not found.'))
+            next(new NotFoundError('Invalid Id.'))
         } else {
-            next()
+            this.model.findById(req.params.id).then(obj => {
+                if (obj) {
+                    if ((<any>obj).tenant_id == req.authenticated.tenant_id) {
+                        next()
+                    } else {
+                        next(new NotFoundError('Tenant not found.'))
+                    }
+                } else {
+                    next(new NotFoundError('Document not found.'))
+                }
+            })
         }
     }
 
     findAll = (req, resp, next) => {
-        this.model.find()
+        this.model
+            .find({
+                "tenant_id": req.authenticated.tenant_id
+            })
             .then(obj => resp.json(obj))
             .catch(next)
     }
 
     findById = (req, resp, next) => {
-        this.model.findById(req.params.id)
-            .then(obj => resp.json(obj))
+        this.model
+            .findById(req.params.id)
+            .then(obj => {
+                resp.json(obj)
+            })
             .catch(next)
     }
 
     save = (req, resp, next) => {
+        // insere a identificação do inquilino no "body" da requisição
+        req.body.tenant_id = req.authenticated.tenant_id
         // cria um novo documento com os atributos do body
         let document = new this.model(req.body)
         // salva o documento no banco de dados
@@ -48,6 +67,10 @@ export abstract class ModelService<D extends mongoose.Document> extends Router {
     }
 
     replace = (req, resp, next) => {
+
+
+
+
         const options = { runValidators: true, overwrite: true }
         this.model.update({ _id: req.params.id }, req.body, options)
             .exec().then(result => {

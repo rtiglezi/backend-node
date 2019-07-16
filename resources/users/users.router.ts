@@ -1,3 +1,4 @@
+
 import * as restify from 'restify'
 import { User } from './users.model'
 import { ModelService } from '../../common/model.service'
@@ -19,7 +20,11 @@ class UsersRouter extends ModelService<User>  {
 
   findByEmail = (req, resp, next) => {
     if (req.query.email) {
-      User.findByEmail(req.query.email)
+      User.find(
+        {
+          "tenant_id": req.authenticated.tenant_id,
+          "email": req.query.email
+        })
         .then(user => {
           user ? [user] : []
           resp.json(user)
@@ -33,6 +38,11 @@ class UsersRouter extends ModelService<User>  {
 
   findAll = (req, resp, next) => {
     User.aggregate([
+      {
+        $match: {
+          tenant_id: req.authenticated.tenant_id
+        }
+      },
       {
         $lookup:
         {
@@ -48,10 +58,10 @@ class UsersRouter extends ModelService<User>  {
         }
       }
     ])
-    .sort({name: 1})
-    .then(users => {
-      resp.json(users)
-    }).catch(next)
+      .sort({ name: 1 })
+      .then(users => {
+        resp.json(users)
+      }).catch(next)
   }
 
 

@@ -11,6 +11,7 @@ import { environment } from '../../common/environment';
    que será útil para poder possibilitar o 
    "autocomplete" e a detecção de erros */
 export interface User extends mongoose.Document {
+    tenant_id: string,
     name: string,
     gender: string,
     cpf: string,
@@ -31,6 +32,10 @@ export interface UserModel extends mongoose.Model<User> {
 /* schema server para informar ao mongoose
    quais são os metadados do documento */
 const userSchema = new mongoose.Schema({
+    tenant_id: {
+        type: String,
+        required: true
+    },
     name: {
         type: String,
         required: true,
@@ -130,12 +135,12 @@ const saveMiddleware = function (next) {
 }
 
 const updateMiddleware = function (next) {
-    
+
     let date = new Date();
     let timestamp = date.getTime();
 
     this.getUpdate().updated_at = timestamp;
-    
+
     if (!this.getUpdate().password) { // "this.getUpdate()" se refere ao objeto modificado 
         next()
     } else {

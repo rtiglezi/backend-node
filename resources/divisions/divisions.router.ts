@@ -1,3 +1,4 @@
+import { authenticate } from './../../security/auth.handler';
 import { ModelService } from '../../common/model.service'
 import * as restify from 'restify'
 import { Division } from './divisions.model'
@@ -12,7 +13,11 @@ class DivisionsRouter extends ModelService<Division> {
     }
 
     findAll = (req, resp, next) => {
-        this.model.find().sort({name: 1})
+        this.model
+            .find({
+                "tenant_id": req.authenticated.tenant_id
+            })
+            .sort({name: 1})
             .then(obj => resp.json(obj))
             .catch(next)
     }

@@ -1,4 +1,3 @@
-import { authenticate } from './auth.handler';
 import * as restify from 'restify'
 import { ForbiddenError } from 'restify-errors'
 

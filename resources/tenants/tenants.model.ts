@@ -1,17 +1,17 @@
 import * as mongoose from 'mongoose'
 
-export interface Division extends mongoose.Document {
-    tenant_id: string,
-    name: string
+export interface Tenant extends mongoose.Document {
+    tenant_alias: string,
+    tenant_name: string
 }
 
 
-const divisionSchema = new mongoose.Schema({
-    tenant_id: {
+const tenantSchema = new mongoose.Schema({
+    tenant_alias: {
         type: String,
-        required: true
+        required: true,
     },
-    name: {
+    tenant_name: {
         type: String,
         required: true,
     }
@@ -37,8 +37,8 @@ const updateMiddleware = function (next) {
 
 
 /* middleware para criptografar a senha no momento de alterar */
-divisionSchema.pre('findOneAndUpdate', updateMiddleware)
-divisionSchema.pre('update', updateMiddleware)
+tenantSchema.pre('findOneAndUpdate', updateMiddleware)
+tenantSchema.pre('update', updateMiddleware)
 
 
-export const Division = mongoose.model<Division>('Division', divisionSchema)
+export const Tenant = mongoose.model<Tenant>('Tenant', tenantSchema)

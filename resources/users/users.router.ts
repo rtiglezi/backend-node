@@ -34,11 +34,22 @@ class UsersRouter extends ModelService<User>  {
   }
 
   findByEmail = (req, resp, next) => {
-    let query = {
-      "email": req.query.email
+    let query = { "email": req.query.email }
+    let queryAnd = {}
+    // se o usuário autenticado for do tipo MASTER...
+    if (req.authenticated.profiles.indexOf('master') !== -1) {
+      // listar todos os usuários de nível inferior
+      Object.assign(query, { "profiles": { $nin: ["master"] } })
+    } else {
+      /* caso contrário (será do tipo ADMIN), listar somente os 
+         usuários pertencentes ao mesmo inquilino, e somente os 
+         que são de nível inferior */
+      Object.assign(query, { "tenant": req.authenticated.tenant })
+      Object.assign(queryAnd, { "profiles": { $nin: ["admin", "master"] } })
     }
+
     if (req.query.email) {
-      User.find(query)
+      User.find({ $and: [query, queryAnd] })
         .then(user => {
           user ? [user] : []
           resp.json(user)
@@ -51,11 +62,24 @@ class UsersRouter extends ModelService<User>  {
 
 
   findAll = (req, resp, next) => {
-    let query = {
+    /* se o solicitante não tiver o perfil MASTER,
+          então filtrar pelo inquilino ao qual ele pertence */
+    let query = {}
+    let queryAnd = {}
+    // se o usuário autenticado for do tipo MASTER...
+    if (req.authenticated.profiles.indexOf('master') !== -1) {
+      // listar todos os usuários de nível inferior
+      Object.assign(query, { "profiles": { $nin: ["master"] } })
+    } else {
+      /* caso contrário (será do tipo ADMIN), listar somente os 
+         usuários pertencentes ao mesmo inquilino, e somente os 
+         que são de nível inferior */
+      Object.assign(query, { "tenant": req.authenticated.tenant })
+      Object.assign(queryAnd, { "profiles": { $nin: ["admin", "master"] } })
     }
     User.aggregate([
       {
-        $match: query
+        $match: { $and: [query, queryAnd] }
       },
       {
         $lookup:
@@ -90,10 +114,26 @@ class UsersRouter extends ModelService<User>  {
 
 
   findById = (req, resp, next) => {
+
+    /* se o solicitante não tiver o perfil MASTER,
+         então filtrar pelo inquilino ao qual ele pertence */
     let query = {
       "_id": req.params.id
     }
-    User.findOne(query)
+    let queryAnd = {}
+    // se o usuário autenticado for do tipo MASTER...
+    if (req.authenticated.profiles.indexOf('master') !== -1) {
+      // listar todos os usuários de nível inferior
+      Object.assign(query, { "profiles": { $nin: ["master"] } })
+    } else {
+      /* caso contrário (será do tipo ADMIN), listar somente os 
+         usuários pertencentes ao mesmo inquilino, e somente os 
+         que são de nível inferior */
+      Object.assign(query, { "tenant": req.authenticated.tenant })
+      Object.assign(queryAnd, { "profiles": { $nin: ["admin", "master"] } })
+    }
+
+    User.findOne({ $and: [query, queryAnd] })
       .then(obj => {
         resp.json(obj)
       })
@@ -103,6 +143,22 @@ class UsersRouter extends ModelService<User>  {
 
 
   save = (req, resp, next) => {
+
+    function profilesFilter(arrOrig, arrayBlock) {
+      return arrOrig.filter(function (element) {
+        return arrayBlock.indexOf(element) == -1;
+      });
+    }
+
+    if (req.authenticated.profiles.indexOf('master') == -1) {
+      req.body.tenant = req.authenticated.tenant
+      let profiles = req.body.profiles
+      req.body.profiles = profilesFilter(profiles, ['admin', 'master'])
+    } else {
+      let profiles = req.body.profiles
+      req.body.profiles = profilesFilter(profiles, ['master'])
+    }
+
     // cria um novo documento com os atributos do body
     let document = new this.model(req.body)
     // salva o documento no banco de dados
@@ -114,11 +170,42 @@ class UsersRouter extends ModelService<User>  {
 
 
   replace = (req, resp, next) => {
+
+
+    function profilesFilter(arrOrig, arrayBlock) {
+      return arrOrig.filter(function (element) {
+        return arrayBlock.indexOf(element) == -1;
+      });
+    }
+
+    if (req.authenticated.profiles.indexOf('master') == -1) {
+      req.body.tenant = req.authenticated.tenant
+      let profiles = req.body.profiles
+      req.body.profiles = profilesFilter(profiles, ['admin', 'master'])
+    } else {
+      let profiles = req.body.profiles
+      req.body.profiles = profilesFilter(profiles, ['master'])
+    }
+
+    /* se o solicitante não tiver o perfil MASTER,
+        então filtrar pelo inquilino ao qual ele pertence */
     let query = {
       "_id": req.params.id
     }
+    let queryAnd = {}
+    // se o usuário autenticado for do tipo MASTER...
+    if (req.authenticated.profiles.indexOf('master') !== -1) {
+      // listar todos os usuários de nível inferior
+      Object.assign(query, { "profiles": { $nin: ["master"] } })
+    } else {
+      /* caso contrário (será do tipo ADMIN), listar somente os 
+         usuários pertencentes ao mesmo inquilino, e somente os 
+         que são de nível inferior */
+      Object.assign(query, { "tenant": req.authenticated.tenant })
+      Object.assign(queryAnd, { "profiles": { $nin: ["admin", "master"] } })
+    }
     const options = { runValidators: true, overwrite: true }
-    User.update(query, req.body, options)
+    User.update({ $and: [query, queryAnd] }, req.body, options)
       .exec().then(result => {
         if (result.n) {
           return this.model.findById(req.params.id).exec()
@@ -132,21 +219,65 @@ class UsersRouter extends ModelService<User>  {
 
 
   update = (req, resp, next) => {
+    
+    function profilesFilter(arrOrig, arrayBlock) {
+      return arrOrig.filter(function (element) {
+        return arrayBlock.indexOf(element) == -1;
+      });
+    }
+
+    if (req.authenticated.profiles.indexOf('master') == -1) {
+      req.body.tenant = req.authenticated.tenant
+      let profiles = req.body.profiles
+      req.body.profiles = profilesFilter(profiles, ['admin', 'master'])
+    } else {
+      let profiles = req.body.profiles
+      req.body.profiles = profilesFilter(profiles, ['master'])
+    }
+
+    /* se o solicitante não tiver o perfil MASTER,
+         então filtrar pelo inquilino ao qual ele pertence */
     let query = {
       "_id": req.params.id
     }
+    let queryAnd = {}
+    // se o usuário autenticado for do tipo MASTER...
+    if (req.authenticated.profiles.indexOf('master') !== -1) {
+      // listar todos os usuários de nível inferior
+      Object.assign(query, { "profiles": { $nin: ["master"] } })
+    } else {
+      /* caso contrário (será do tipo ADMIN), listar somente os 
+         usuários pertencentes ao mesmo inquilino, e somente os 
+         que são de nível inferior */
+      Object.assign(query, { "tenant": req.authenticated.tenant })
+      Object.assign(queryAnd, { "profiles": { $nin: ["admin", "master"] } })
+    }
     const options = { runValidators: true, new: true }
-    User.findOneAndUpdate(query, req.body, options)
+    User.findOneAndUpdate({ $and: [query, queryAnd] }, req.body, options)
       .then(obj => resp.json(obj))
       .catch(next)
   }
 
 
   delete = (req, resp, next) => {
+    /* se o solicitante não tiver o perfil MASTER,
+        então filtrar pelo inquilino ao qual ele pertence */
     let query = {
       "_id": req.params.id
     }
-    User.remove(query)
+    let queryAnd = {}
+    // se o usuário autenticado for do tipo MASTER...
+    if (req.authenticated.profiles.indexOf('master') !== -1) {
+      // listar todos os usuários de nível inferior
+      Object.assign(query, { "profiles": { $nin: ["master"] } })
+    } else {
+      /* caso contrário (será do tipo ADMIN), listar somente os 
+         usuários pertencentes ao mesmo inquilino, e somente os 
+         que são de nível inferior */
+      Object.assign(query, { "tenant": req.authenticated.tenant })
+      Object.assign(queryAnd, { "profiles": { $nin: ["admin", "master"] } })
+    }
+    User.remove({ $and: [query, queryAnd] })
       .exec()
       .then((cmdResult: any) => {
         if (cmdResult.result.n) {

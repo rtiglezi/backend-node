@@ -1,4 +1,3 @@
-import { authenticate } from './../../security/auth.handler';
 import { ModelService } from '../../common/model.service'
 import * as restify from 'restify'
 import { Division } from './divisions.model'

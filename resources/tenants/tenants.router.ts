@@ -13,8 +13,17 @@ class TenantsRouter extends ModelService<Tenant> {
     }
 
     findAll = (req, resp, next) => {
+    
+        /* se o solicitante não tiver o perfil MASTER,
+           então filtrar pelo inquilino ao qual ele pertence */
+        let query = {}
+        if (req.authenticated.profiles.indexOf('master')==-1) {  
+            Object.assign(query,{"_id": req.authenticated.tenant})
+            console.log(query)
+        }
+
         Tenant
-            .find()
+            .find(query)
             .sort({name: 1})
             .then(obj => resp.json(obj))
             .catch(next)
@@ -74,7 +83,7 @@ class TenantsRouter extends ModelService<Tenant> {
 
 
     applyRoutes(application: restify.Server) {
-        application.get(`/tenants`, [authorize('master'), this.findAll])
+        application.get(`/tenants`, [authorize('master', 'admin'), this.findAll])
         application.get(`/tenants/:id`, [authorize('master'), this.findById])
         application.post(`/tenants`, [authorize('master'), this.save])
         application.put(`/tenants/:id`, [authorize('master'), this.replace])

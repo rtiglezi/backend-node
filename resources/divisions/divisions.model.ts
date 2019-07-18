@@ -1,14 +1,16 @@
 import * as mongoose from 'mongoose'
+import { Tenant } from '../tenants/tenants.model';
 
 export interface Division extends mongoose.Document {
-    tenant_id: string,
+    tenant: mongoose.Types.ObjectId | Tenant
     name: string
 }
 
 
 const divisionSchema = new mongoose.Schema({
-    tenant_id: {
-        type: String,
+    tenant: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tenant',
         required: true
     },
     name: {

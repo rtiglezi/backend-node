@@ -12,19 +12,36 @@ class DivisionsRouter extends ModelService<Division> {
         super(Division)
     }
 
+
+    findBySpecificTenant = (req, resp, next) => {
+        let query = {
+            "tenant": req.query.tenant
+        }
+        if (req.query.tenant) {
+            Division.find(query)
+                .then(division => {
+                    division ? [division] : []
+                    resp.json(division)
+                })
+                .catch(next)
+        } else {
+            next()
+        }
+    }
+
+
     findAll = (req, resp, next) => {
+        let query = { "tenant": req.authenticated.tenant }
         this.model
-            .find({
-                "tenant_id": req.authenticated.tenant_id
-            })
-            .sort({name: 1})
+            .find(query)
+            .sort({ name: 1 })
             .then(obj => resp.json(obj))
             .catch(next)
     }
 
 
     applyRoutes(application: restify.Server) {
-        application.get(`${this.basePath}`, [authorize('user'), this.findAll])
+        application.get(`${this.basePath}`, [authorize('user'), this.findBySpecificTenant, this.findAll])
         application.get(`${this.basePath}/:id`, [authorize('user'), this.validateId, this.findById])
         application.post(`${this.basePath}`, [authorize('admin'), this.save])
         application.put(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.replace])

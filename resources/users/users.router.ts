@@ -12,19 +12,33 @@ import { usersLastDivision } from './users.last-division.handler';
 import { checkOwner } from '../../security/check-owner.handler';
 
 
+import { NotFoundError } from 'restify-errors'
+
+
+import * as mongoose from 'mongoose'
+
+
 class UsersRouter extends ModelService<User>  {
 
   constructor() {
     super(User)
   }
 
+  validateId = (req, resp, next) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      next(new NotFoundError('Invalid Id.'))
+    } else {
+      next()
+
+    }
+  }
+
   findByEmail = (req, resp, next) => {
+    let query = {
+      "email": req.query.email
+    }
     if (req.query.email) {
-      User.find(
-        {
-          "tenant_id": req.authenticated.tenant_id,
-          "email": req.query.email
-        })
+      User.find(query)
         .then(user => {
           user ? [user] : []
           resp.json(user)
@@ -37,11 +51,11 @@ class UsersRouter extends ModelService<User>  {
 
 
   findAll = (req, resp, next) => {
+    let query = {
+    }
     User.aggregate([
       {
-        $match: {
-          tenant_id: req.authenticated.tenant_id
-        }
+        $match: query
       },
       {
         $lookup:
@@ -50,6 +64,15 @@ class UsersRouter extends ModelService<User>  {
           localField: "allowedDivisions",
           foreignField: "_id",
           as: "allowedDivisionsDetails"
+        }
+      },
+      {
+        $lookup:
+        {
+          from: "tenants",
+          localField: "tenant",
+          foreignField: "_id",
+          as: "tenantDetails"
         }
       },
       {
@@ -65,14 +88,85 @@ class UsersRouter extends ModelService<User>  {
   }
 
 
+
+  findById = (req, resp, next) => {
+    let query = {
+      "_id": req.params.id
+    }
+    User.findOne(query)
+      .then(obj => {
+        resp.json(obj)
+      })
+      .catch(next)
+  }
+
+
+
+  save = (req, resp, next) => {
+    // cria um novo documento com os atributos do body
+    let document = new this.model(req.body)
+    // salva o documento no banco de dados
+    document.save()
+      .then(obj => resp.json(obj))
+      .catch(next)
+  }
+
+
+
+  replace = (req, resp, next) => {
+    let query = {
+      "_id": req.params.id
+    }
+    const options = { runValidators: true, overwrite: true }
+    User.update(query, req.body, options)
+      .exec().then(result => {
+        if (result.n) {
+          return this.model.findById(req.params.id).exec()
+        } else {
+          throw new NotFoundError('Document not found.')
+        }
+      }).then(obj => resp.json(obj))
+      .catch(next)
+  }
+
+
+
+  update = (req, resp, next) => {
+    let query = {
+      "_id": req.params.id
+    }
+    const options = { runValidators: true, new: true }
+    User.findOneAndUpdate(query, req.body, options)
+      .then(obj => resp.json(obj))
+      .catch(next)
+  }
+
+
+  delete = (req, resp, next) => {
+    let query = {
+      "_id": req.params.id
+    }
+    User.remove(query)
+      .exec()
+      .then((cmdResult: any) => {
+        if (cmdResult.result.n) {
+          resp.send(204)
+        } else {
+          throw new NotFoundError('Document not found.')
+        }
+        return next()
+      }).catch(next)
+  }
+
+
   applyRoutes(application: restify.Server) {
     // rotas para o CRUD de usuarios
-    application.get(`${this.basePath}`, [authorize('admin'), this.findByEmail, this.findAll])
-    application.get(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.findById])
-    application.post(`${this.basePath}`, [authorize('admin'), this.save])
-    application.put(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.replace])
-    application.patch(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.update])
-    application.del(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.delete])
+    application.get(`${this.basePath}`, [authorize('admin', 'master'), this.findByEmail, this.findAll])
+    application.get(`${this.basePath}/:id`, [authorize('admin', 'master'), this.validateId, this.findById])
+    application.post(`${this.basePath}`, [authorize('admin', 'master'), this.save])
+    application.put(`${this.basePath}/:id`, [authorize('admin', 'master'), this.validateId, this.replace])
+    application.patch(`${this.basePath}/:id`, [authorize('admin', 'master'), this.validateId, this.update])
+    application.del(`${this.basePath}/:id`, [authorize('admin', 'master'), this.validateId, this.delete])
 
     // rotas para controle de acesso
     application.post(`${this.basePath}/authenticate`, authenticate)
@@ -97,8 +191,4 @@ class UsersRouter extends ModelService<User>  {
 
 }
 
-/* instanciar esta classe e disponibilizá-la para
-   que outras partes da aplicação possam utilizar,
-   por exemplo na invocação do método "bootstrap"
-   no arquivo main.ts */
 export const usersRouter = new UsersRouter()

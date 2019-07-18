@@ -13,7 +13,7 @@ exports.authenticate = (req, resp, next) => {
         let payload = {
             sub: user.email,
             iss: 'e-proc-api',
-            tnt: user.tenant_id
+            tnt: user.tenant
         };
         const token = jwt.sign(payload, environment_1.environment.security.apiSecret, { expiresIn: '8h' });
         resp.json({

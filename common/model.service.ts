@@ -25,7 +25,7 @@ export abstract class ModelService<D extends mongoose.Document> extends Router {
         } else {
             this.model.findById(req.params.id).then(obj => {
                 if (obj) {
-                    if ((<any>obj).tenant_id == req.authenticated.tenant_id) {
+                    if ((<any>obj).tenant.toString() == req.authenticated.tenant.toString()) {
                         next()
                     } else {
                         next(new NotFoundError('Tenant not found.'))
@@ -40,7 +40,7 @@ export abstract class ModelService<D extends mongoose.Document> extends Router {
     findAll = (req, resp, next) => {
         this.model
             .find({
-                "tenant_id": req.authenticated.tenant_id
+                "tenant": req.authenticated.tenant
             })
             .then(obj => resp.json(obj))
             .catch(next)
@@ -57,7 +57,7 @@ export abstract class ModelService<D extends mongoose.Document> extends Router {
 
     save = (req, resp, next) => {
         // insere a identificação do inquilino no "body" da requisição
-        req.body.tenant_id = req.authenticated.tenant_id
+        req.body.tenant = req.authenticated.tenant
         // cria um novo documento com os atributos do body
         let document = new this.model(req.body)
         // salva o documento no banco de dados
@@ -67,9 +67,6 @@ export abstract class ModelService<D extends mongoose.Document> extends Router {
     }
 
     replace = (req, resp, next) => {
-
-
-
 
         const options = { runValidators: true, overwrite: true }
         this.model.update({ _id: req.params.id }, req.body, options)
@@ -84,6 +81,7 @@ export abstract class ModelService<D extends mongoose.Document> extends Router {
     }
 
     update = (req, resp, next) => {
+
         /* para que o objeto a ser retornado
            seja o objeto novo, ou seja, o que resultou
            das alterações, utiliza-se a opção a seguir: */

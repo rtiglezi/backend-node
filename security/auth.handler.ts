@@ -15,7 +15,7 @@ export const authenticate: restify.RequestHandler = (req, resp, next) => {
       let payload = {
         sub: user.email,
         iss: 'e-proc-api',
-        tnt: user.tenant_id
+        tnt: user.tenant
       }
       
       const token = jwt.sign(payload, environment.security.apiSecret, { expiresIn: '8h' })

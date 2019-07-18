@@ -1,17 +1,17 @@
 import * as mongoose from 'mongoose'
 
 export interface Tenant extends mongoose.Document {
-    tenant_alias: string,
-    tenant_name: string
+    alias: string,
+    name: string
 }
 
 
 const tenantSchema = new mongoose.Schema({
-    tenant_alias: {
+    alias: {
         type: String,
         required: true,
     },
-    tenant_name: {
+    name: {
         type: String,
         required: true,
     }

@@ -2,6 +2,7 @@ import * as mongoose from 'mongoose'
 import * as bcrypt from 'bcrypt'
 
 import { Division } from '../divisions/divisions.model';
+import { Tenant } from '../tenants/tenants.model';
 
 import { validateCPF } from '../../common/validators'
 import { environment } from '../../common/environment';
@@ -11,7 +12,7 @@ import { environment } from '../../common/environment';
    que será útil para poder possibilitar o 
    "autocomplete" e a detecção de erros */
 export interface User extends mongoose.Document {
-    tenant_id: string,
+    tenant: mongoose.Types.ObjectId | Tenant
     name: string,
     gender: string,
     cpf: string,
@@ -32,8 +33,9 @@ export interface UserModel extends mongoose.Model<User> {
 /* schema server para informar ao mongoose
    quais são os metadados do documento */
 const userSchema = new mongoose.Schema({
-    tenant_id: {
-        type: String,
+    tenant: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tenant',
         required: true
     },
     name: {

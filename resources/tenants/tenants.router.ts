@@ -74,12 +74,12 @@ class TenantsRouter extends ModelService<Tenant> {
 
 
     applyRoutes(application: restify.Server) {
-        application.get(`/tenants`, [authorize('creator'), this.findAll])
-        application.get(`/tenants/:id`, [authorize('creator'), this.findById])
-        application.post(`/tenants`, [authorize('creator'), this.save])
-        application.put(`/tenants/:id`, [authorize('creator'), this.replace])
-        application.patch(`/tenants/:id`, [authorize('creator'), this.update])
-        application.del(`/tenants/:id`, [authorize('creator'), this.delete])
+        application.get(`/tenants`, [authorize('master'), this.findAll])
+        application.get(`/tenants/:id`, [authorize('master'), this.findById])
+        application.post(`/tenants`, [authorize('master'), this.save])
+        application.put(`/tenants/:id`, [authorize('master'), this.replace])
+        application.patch(`/tenants/:id`, [authorize('master'), this.update])
+        application.del(`/tenants/:id`, [authorize('master'), this.delete])
     }
 }
 

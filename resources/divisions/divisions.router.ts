@@ -4,6 +4,10 @@ import { Division } from './divisions.model'
 
 import { authorize } from '../../security/authz.handler';
 
+import { MethodNotAllowedError } from 'restify-errors'
+
+import { Request } from '../requests/requests.model';
+
 
 class DivisionsRouter extends ModelService<Division> {
 
@@ -38,6 +42,8 @@ class DivisionsRouter extends ModelService<Division> {
             .catch(next)
     }
 
+
+   
 
     applyRoutes(application: restify.Server) {
         application.get(`${this.basePath}`, [authorize('user'), this.findBySpecificTenant, this.findAll])

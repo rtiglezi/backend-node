@@ -38,8 +38,6 @@ export const authenticate: restify.RequestHandler = (req, resp, next) => {
 
             })
 
-      
-     
 
     }).catch(next)
 }

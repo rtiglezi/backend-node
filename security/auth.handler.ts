@@ -3,6 +3,7 @@ import * as jwt from 'jsonwebtoken'
 import { UnauthorizedError } from 'restify-errors'
 import { User } from '../resources/users/users.model'
 import { environment } from '../common/environment'
+import { Tenant } from '../resources/tenants/tenants.model';
 
 export const authenticate: restify.RequestHandler = (req, resp, next) => {
   const { email, password } = req.body
@@ -19,14 +20,26 @@ export const authenticate: restify.RequestHandler = (req, resp, next) => {
       }
       
       const token = jwt.sign(payload, environment.security.apiSecret, { expiresIn: '8h' })
-      resp.json(
-        { 
-          name: user.name, 
-          email: user.email, 
-          accessToken: token, 
-          profiles: user.profiles 
-        })
-      return next(false)
+      
+      Tenant.findById(user.tenant)
+            .then(tenant => {
+
+              resp.json(
+                { 
+                  tenant: tenant.alias,
+                  name: user.name, 
+                  email: user.email, 
+                  accessToken: token, 
+                  profiles: user.profiles 
+                })
+              
+              
+                return next(false)
+
+            })
+
+      
+     
 
     }).catch(next)
 }

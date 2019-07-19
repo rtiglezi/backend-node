@@ -16,7 +16,16 @@ class RequestsRouter extends ModelService<Request> {
         Request.aggregate([
             {
                 $match: {
-                    tenant_id: req.authenticated.tenant_id
+                    tenant: req.authenticated.tenant
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "tenants",
+                    localField: "tenant",
+                    foreignField: "_id",
+                    as: "tenantDetails"
                 }
             },
             {
@@ -26,11 +35,6 @@ class RequestsRouter extends ModelService<Request> {
                     localField: "allowedDivisions",
                     foreignField: "_id",
                     as: "allowedDivisionsDetails"
-                }
-            },
-            {
-                $project: {
-                    password: 0
                 }
             }
         ])
@@ -42,7 +46,11 @@ class RequestsRouter extends ModelService<Request> {
 
 
     findStages = (req, resp, next) => {
-        Request.findById(req.params.id, "+stages")
+        let query = {
+            "_id": req.params.id,
+            "tenant": req.authenticated.tenant 
+        }
+        Request.findOne(query, "+stages")
             .then(rqst => {
                 if (!rqst) {
                     throw new NotFoundError('Request not found.')
@@ -54,7 +62,11 @@ class RequestsRouter extends ModelService<Request> {
     }
 
     replaceStages = (req, resp, next) => {
-        Request.findById(req.params.id)
+        let query = {
+            "_id": req.params.id,
+            "tenant": req.authenticated.tenant 
+        }
+        Request.findOne(query)
             .then(rqst => {
                 if (!rqst) {
                     throw new NotFoundError('Request not found.')
@@ -93,7 +105,7 @@ class RequestsRouter extends ModelService<Request> {
 
                         if (r._id === req.params.stId) {
 
-                            r.results = req.body //ARRAY de estágios
+                            r.results = req.body //ARRAY de etapas
                             return r.save()
 
                         }

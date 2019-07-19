@@ -1,7 +1,7 @@
 import * as restify from 'restify'
 import { Tenant } from './tenants.model'
 import { authorize } from '../../security/authz.handler';
-import { NotFoundError } from 'restify-errors'
+import { NotFoundError, UnauthorizedError } from 'restify-errors'
 import { ModelService } from '../../common/model.service'
 
 
@@ -29,7 +29,18 @@ class TenantsRouter extends ModelService<Tenant> {
             .catch(next)
     }
 
+   
     findById = (req, resp, next) => {
+
+        /* se o usuário que fez a requisição não for do tipo MASTER
+           e não pertencer ao inquilino buscado, negar o acesso.
+           */ 
+        if (req.authenticated.profiles.indexOf('master')==-1) {
+            if (req.params.id != req.authenticated.tenant) {
+                return next(new UnauthorizedError('Access denied to this tenant.'))
+            }
+        }    
+
         Tenant
             .findById(req.params.id)
             .then(obj => {
@@ -84,7 +95,7 @@ class TenantsRouter extends ModelService<Tenant> {
 
     applyRoutes(application: restify.Server) {
         application.get(`/tenants`, [authorize('master', 'admin'), this.findAll])
-        application.get(`/tenants/:id`, [authorize('master'), this.findById])
+        application.get(`/tenants/:id`, [authorize('master', 'admin', 'user'), this.findById])
         application.post(`/tenants`, [authorize('master'), this.save])
         application.put(`/tenants/:id`, [authorize('master'), this.replace])
         application.patch(`/tenants/:id`, [authorize('master'), this.update])

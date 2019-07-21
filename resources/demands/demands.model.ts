@@ -1,7 +1,8 @@
-import { User } from './../users/users.model';
-import { Division } from './../divisions/divisions.model';
 import * as mongoose from 'mongoose';
+
 import { Tenant } from '../tenants/tenants.model';
+import { Division } from '../divisions/divisions.model';
+import { User } from '../users/users.model';
 
 
 export interface Result extends mongoose.Document {
@@ -18,7 +19,7 @@ export interface Stage extends mongoose.Document {
     allowedUsers: [mongoose.Types.ObjectId | User]
 }
 
-export interface Request extends mongoose.Document {
+export interface Demand extends mongoose.Document {
     tenant: mongoose.Types.ObjectId | Tenant
     name: string,
     stages: Stage[]
@@ -62,7 +63,7 @@ const stageSchema = new mongoose.Schema({
     }]
 })
 
-const requestSchema = new mongoose.Schema({
+const demandSchema = new mongoose.Schema({
     tenant: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tenant',
@@ -77,6 +78,13 @@ const requestSchema = new mongoose.Schema({
         required: false,
         select: false
     }
-})
+},
+    {
+        timestamps: {
+            createdAt: 'created_at',
+            updatedAt: 'updated_at'
+        }
 
-export const Request = mongoose.model<Request>('Request', requestSchema)
+    })
+
+export const Demand = mongoose.model<Demand>('Demand', demandSchema)

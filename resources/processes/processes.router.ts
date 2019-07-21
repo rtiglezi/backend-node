@@ -1,43 +1,68 @@
-import { ModelRouter } from '../../common/model.router'
 import * as restify from 'restify'
-import { Division } from './divisions.model'
+import { ModelRouter } from '../../common/model.router'
 
 import { authorize } from '../../security/authz.handler';
+import { Process } from './processes.model';
 
 import { NotFoundError } from 'restify-errors'
 
+import * as mongoose from 'mongoose'
 
-class DivisionsRouter extends ModelRouter<Division> {
+
+class ProcessesRouter extends ModelRouter<Process> {
 
     constructor() {
-        super(Division)
+        super(Process)
     }
-
-
-    findBySpecificTenant = (req, resp, next) => {
-        let query = {
-            "tenant": req.query.tenant
-        }
-        if (req.query.tenant) {
-            Division.find(query)
-                .then(division => {
-                    division ? [division] : []
-                    resp.json(division)
-                })
-                .catch(next)
-        } else {
-            next()
-        }
-    }
-
 
     findAll = (req, resp, next) => {
-        let query = { "tenant": req.authenticated.tenant }
-        this.model
-            .find(query)
-            .sort({ name: 1 })
-            .then(obj => resp.json(obj))
-            .catch(next)
+        Process.aggregate([
+            {
+                $match: {
+                    tenant: req.authenticated.tenant
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "tenants",
+                    localField: "tenant",
+                    foreignField: "_id",
+                    as: "tenantDetails"
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "demands",
+                    localField: "demand",
+                    foreignField: "_id",
+                    as: "demandDetails"
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "divisions",
+                    localField: "division",
+                    foreignField: "_id",
+                    as: "divisionDetails"
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "users",
+                    localField: "user",
+                    foreignField: "_id",
+                    as: "userDetails"
+                }
+            }
+        ])
+            .sort({ number: 1 })
+            .then(processes => {
+                resp.json(processes)
+            }).catch(next)
     }
 
 
@@ -46,7 +71,7 @@ class DivisionsRouter extends ModelRouter<Division> {
             "_id": req.params.id
         }
         Object.assign(query, { "tenant": req.authenticated.tenant })
-        Division.findOne(query)
+        Process.findOne(query)
             .then(obj => {
                 resp.json(obj)
             })
@@ -58,7 +83,7 @@ class DivisionsRouter extends ModelRouter<Division> {
         // insere a identificação do inquilino no "body" da requisição
         req.body.tenant = req.authenticated.tenant
         // cria um novo documento com os atributos do body
-        let document = new Division(req.body)
+        let document = new Process(req.body)
         // salva o documento no banco de dados
         document.save()
             .then(obj => resp.json(obj))
@@ -72,7 +97,7 @@ class DivisionsRouter extends ModelRouter<Division> {
         }
         Object.assign(query, { "tenant": req.authenticated.tenant })
         const options = { runValidators: true, overwrite: true }
-        Division.update(query, req.body, options)
+        Process.update(query, req.body, options)
           .exec().then(result => {
             if (result.n) {
               return this.model.findById(req.params.id).exec()
@@ -92,7 +117,7 @@ class DivisionsRouter extends ModelRouter<Division> {
         let queryAnd = {}
         Object.assign(query, { "tenant": req.authenticated.tenant })
         const options = { runValidators: true, new: true }
-        Division.findOneAndUpdate({ $and: [query, queryAnd] }, req.body, options)
+        Process.findOneAndUpdate({ $and: [query, queryAnd] }, req.body, options)
           .then(obj => resp.json(obj))
           .catch(next)
       }
@@ -103,7 +128,7 @@ class DivisionsRouter extends ModelRouter<Division> {
           "_id": req.params.id
         }
         Object.assign(query, { "tenant": req.authenticated.tenant })
-        Division.remove(query)
+        Process.remove(query)
           .exec()
           .then((cmdResult: any) => {
             if (cmdResult.result.n) {
@@ -116,15 +141,17 @@ class DivisionsRouter extends ModelRouter<Division> {
       }
 
 
+ 
 
     applyRoutes(application: restify.Server) {
-        application.get(`${this.basePath}`, [authorize('user'), this.findBySpecificTenant, this.findAll])
-        application.get(`${this.basePath}/:id`, [authorize('user'), this.validateId, this.findById])
+        application.get(`${this.basePath}`, [authorize('admin', 'user'), this.findAll])
+        application.get(`${this.basePath}/:id`, [authorize('admin', 'user'), this.validateId, this.findById])
         application.post(`${this.basePath}`, [authorize('admin'), this.save])
         application.put(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.replace])
         application.patch(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.update])
         application.del(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.delete])
+
     }
 }
 
-export const divisionsRouter = new DivisionsRouter()
+export const processesRouter = new ProcessesRouter()

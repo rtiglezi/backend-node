@@ -20,7 +20,8 @@ exports.authenticate = (req, resp, next) => {
         tenants_model_1.Tenant.findById(user.tenant)
             .then(tenant => {
             resp.json({
-                tenant: tenant.alias,
+                tenant: tenant._id,
+                tenantAlias: tenant.alias,
                 name: user.name,
                 email: user.email,
                 accessToken: token,

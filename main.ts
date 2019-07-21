@@ -1,9 +1,13 @@
 import { Server } from './server/server'
+
+import { mainRouter } from './main.router';
+
+import { tenantsRouter } from './resources/tenants/tenants.router';
 import { usersRouter } from './resources/users/users.router';
 import { divisionsRouter } from './resources/divisions/divisions.router';
-import { mainRouter } from './main.router';
-import { requestsRouter } from './resources/requests/requests.router';
-import { tenantsRouter } from './resources/tenants/tenants.router';
+import { demandsRouter } from './resources/demands/demands.router';
+import { processesRouter } from './resources/processes/processes.router';
+
 
 // instanciar a classe Server
 const server = new Server()
@@ -16,7 +20,8 @@ server.bootstrap([
     tenantsRouter,
     usersRouter,
     divisionsRouter,
-    requestsRouter,
+    demandsRouter,
+    processesRouter,
     mainRouter
 ]).then(server => {
     console.log('Server is listening on:', server.application.address())

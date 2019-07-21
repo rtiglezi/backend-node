@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const server_1 = require("./server/server");
+const main_router_1 = require("./main.router");
+const tenants_router_1 = require("./resources/tenants/tenants.router");
 const users_router_1 = require("./resources/users/users.router");
 const divisions_router_1 = require("./resources/divisions/divisions.router");
-const main_router_1 = require("./main.router");
-const requests_router_1 = require("./resources/requests/requests.router");
-const tenants_router_1 = require("./resources/tenants/tenants.router");
+const demands_router_1 = require("./resources/demands/demands.router");
+const processes_router_1 = require("./resources/processes/processes.router");
 // instanciar a classe Server
 const server = new server_1.Server();
 /* Invocar o método "bootstrap", que está na classe "Server"
@@ -16,7 +17,8 @@ server.bootstrap([
     tenants_router_1.tenantsRouter,
     users_router_1.usersRouter,
     divisions_router_1.divisionsRouter,
-    requests_router_1.requestsRouter,
+    demands_router_1.demandsRouter,
+    processes_router_1.processesRouter,
     main_router_1.mainRouter
 ]).then(server => {
     console.log('Server is listening on:', server.application.address());

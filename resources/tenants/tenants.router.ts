@@ -2,12 +2,12 @@ import * as restify from 'restify'
 import { Tenant } from './tenants.model'
 import { authorize } from '../../security/authz.handler';
 import { NotFoundError, UnauthorizedError, MethodNotAllowedError } from 'restify-errors'
-import { ModelService } from '../../common/model.service'
+import { ModelRouter } from '../../common/model.router'
 import { User } from '../users/users.model';
 
 
 
-class TenantsRouter extends ModelService<Tenant> {
+class TenantsRouter extends ModelRouter<Tenant> {
 
     constructor() {
         super(Tenant)
@@ -51,7 +51,6 @@ class TenantsRouter extends ModelService<Tenant> {
     }
 
     save = (req, resp, next) => {
-        // insere a identificação do inquilino no "body" da requisição
         // cria um novo documento com os atributos do body
         let document = new Tenant(req.body)
         // salva o documento no banco de dados

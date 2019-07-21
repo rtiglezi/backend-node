@@ -9,8 +9,7 @@ class MainRouter extends Router {
       (req, resp, next) => {
         resp.json({
           users: '/users',
-          divisions: '/divisions',
-          requests: '/requests'
+          divisions: '/divisions'
         })
       }])
   }

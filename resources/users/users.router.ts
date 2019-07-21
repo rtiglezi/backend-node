@@ -1,7 +1,7 @@
 
 import * as restify from 'restify'
 import { User } from './users.model'
-import { ModelService } from '../../common/model.service'
+import { ModelRouter } from '../../common/model.router'
 import { authenticate } from '../../security/auth.handler'
 import { authorize } from '../../security/authz.handler';
 import { changePassword } from '../../security/change-password.handler';
@@ -18,7 +18,7 @@ import { NotFoundError } from 'restify-errors'
 import * as mongoose from 'mongoose'
 
 
-class UsersRouter extends ModelService<User>  {
+class UsersRouter extends ModelRouter<User>  {
 
   constructor() {
     super(User)
@@ -47,7 +47,6 @@ class UsersRouter extends ModelService<User>  {
       Object.assign(query, { "tenant": req.authenticated.tenant })
       Object.assign(queryAnd, { "profiles": { $nin: ["admin", "master"] } })
     }
-
     if (req.query.email) {
       User.find({ $and: [query, queryAnd] })
         .then(user => {
@@ -114,7 +113,6 @@ class UsersRouter extends ModelService<User>  {
 
 
   findById = (req, resp, next) => {
-
     /* se o solicitante não tiver o perfil MASTER,
          então filtrar pelo inquilino ao qual ele pertence */
     let query = {
@@ -132,7 +130,6 @@ class UsersRouter extends ModelService<User>  {
       Object.assign(query, { "tenant": req.authenticated.tenant })
       Object.assign(queryAnd, { "profiles": { $nin: ["admin", "master"] } })
     }
-
     User.findOne({ $and: [query, queryAnd] })
       .then(obj => {
         resp.json(obj)
@@ -143,13 +140,11 @@ class UsersRouter extends ModelService<User>  {
 
 
   save = (req, resp, next) => {
-
     function profilesFilter(arrOrig, arrayBlock) {
       return arrOrig.filter(function (element) {
         return arrayBlock.indexOf(element) == -1;
       });
     }
-
     if (req.authenticated.profiles.indexOf('master') == -1) {
       req.body.tenant = req.authenticated.tenant
       let profiles = req.body.profiles
@@ -158,9 +153,8 @@ class UsersRouter extends ModelService<User>  {
       let profiles = req.body.profiles
       req.body.profiles = profilesFilter(profiles, ['master'])
     }
-
     // cria um novo documento com os atributos do body
-    let document = new this.model(req.body)
+    let document = new User(req.body)
     // salva o documento no banco de dados
     document.save()
       .then(obj => resp.json(obj))
@@ -170,14 +164,11 @@ class UsersRouter extends ModelService<User>  {
 
 
   replace = (req, resp, next) => {
-
-
     function profilesFilter(arrOrig, arrayBlock) {
       return arrOrig.filter(function (element) {
         return arrayBlock.indexOf(element) == -1;
       });
     }
-
     if (req.authenticated.profiles.indexOf('master') == -1) {
       req.body.tenant = req.authenticated.tenant
       let profiles = req.body.profiles
@@ -186,7 +177,6 @@ class UsersRouter extends ModelService<User>  {
       let profiles = req.body.profiles
       req.body.profiles = profilesFilter(profiles, ['master'])
     }
-
     /* se o solicitante não tiver o perfil MASTER,
         então filtrar pelo inquilino ao qual ele pertence */
     let query = {
@@ -219,13 +209,11 @@ class UsersRouter extends ModelService<User>  {
 
 
   update = (req, resp, next) => {
-    
     function profilesFilter(arrOrig, arrayBlock) {
       return arrOrig.filter(function (element) {
         return arrayBlock.indexOf(element) == -1;
       });
     }
-
     if (req.authenticated.profiles.indexOf('master') == -1) {
       req.body.tenant = req.authenticated.tenant
       let profiles = req.body.profiles
@@ -234,7 +222,6 @@ class UsersRouter extends ModelService<User>  {
       let profiles = req.body.profiles
       req.body.profiles = profilesFilter(profiles, ['master'])
     }
-
     /* se o solicitante não tiver o perfil MASTER,
          então filtrar pelo inquilino ao qual ele pertence */
     let query = {

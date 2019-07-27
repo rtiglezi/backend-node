@@ -14,6 +14,7 @@ export interface Result extends mongoose.Document {
 export interface Stage extends mongoose.Document {
     name: string,
     position: number,
+    reservedBySistem: boolean,
     results: Result[],
     allowedDivisions: [mongoose.Types.ObjectId | Division],
     allowedUsers: [mongoose.Types.ObjectId | User]
@@ -46,6 +47,9 @@ const stageSchema = new mongoose.Schema({
     },
     position: {
         type: Number
+    },
+    reservedBySistem: {
+        type: Boolean
     },
     results: {
         type: [resultSchema],

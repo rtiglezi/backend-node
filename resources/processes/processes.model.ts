@@ -1,4 +1,3 @@
-import { Request } from './../../index.d';
 import * as mongoose from 'mongoose';
 
 import { Tenant } from '../tenants/tenants.model';
@@ -8,20 +7,21 @@ import { User } from '../users/users.model';
 
 
 export interface Requester extends mongoose.Document {
-    person: string,
-    document: string,
-    name: string,
+    person: string
+    document: string
+    name: string
     tradingName: string
 }
 
 export interface Process extends mongoose.Document {
     tenant: mongoose.Types.ObjectId | Tenant
     demand: mongoose.Types.ObjectId | Demand
+    stage: mongoose.Types.ObjectId
     division: mongoose.Types.ObjectId | Division
     user: mongoose.Types.ObjectId | User
-    requester: mongoose.Types.ObjectId | Requester,
-    number: string,
-    city: string,
+    requester: mongoose.Types.ObjectId | Requester
+    number: string
+    city: string
     state: string
 }
 
@@ -61,6 +61,9 @@ const processSchema = new mongoose.Schema({
         ref: 'Demand',
         required: true
     },
+    stage: {
+        type: mongoose.Schema.Types.ObjectId
+    },
     division: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Division'
@@ -92,5 +95,23 @@ const processSchema = new mongoose.Schema({
             updatedAt: 'updated_at'
         }
     })
+
+     
+    const updateMiddleware = function (next) {
+    
+        let date = new Date();
+        let timestamp = date.getTime();
+    
+        this.getUpdate().updated_at = timestamp;
+
+        next();
+    }
+    
+    
+    /* middleware para criptografar a senha no momento de alterar */
+    processSchema.pre('findOneAndUpdate', updateMiddleware)
+    processSchema.pre('update', updateMiddleware)
+    
+
 
 export const Process = mongoose.model<Process>('Process', processSchema)

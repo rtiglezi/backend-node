@@ -60,6 +60,7 @@ class DemandsRouter extends ModelRouter<Demand> {
     save = (req, resp, next) => {
         // insere a identificação do inquilino no "body" da requisição
         req.body.tenant = req.authenticated.tenant
+        req.body.stages = { name: "Cadastro", reservedBySistem: true }
         // cria um novo documento com os atributos do body
         let document = new Demand(req.body)
         // salva o documento no banco de dados
@@ -70,59 +71,59 @@ class DemandsRouter extends ModelRouter<Demand> {
 
     replace = (req, resp, next) => {
         let query = {
-          "_id": req.params.id
+            "_id": req.params.id
         }
         Object.assign(query, { "tenant": req.authenticated.tenant })
         const options = { runValidators: true, overwrite: true }
         Demand.update(query, req.body, options)
-          .exec().then(result => {
-            if (result.n) {
-              return this.model.findById(req.params.id).exec()
-            } else {
-              throw new NotFoundError('Document not found.')
-            }
-          }).then(obj => resp.json(obj))
-          .catch(next)
-      }
-    
-    
-    
-      update = (req, resp, next) => {
+            .exec().then(result => {
+                if (result.n) {
+                    return this.model.findById(req.params.id).exec()
+                } else {
+                    throw new NotFoundError('Document not found.')
+                }
+            }).then(obj => resp.json(obj))
+            .catch(next)
+    }
+
+
+
+    update = (req, resp, next) => {
         let query = {
-          "_id": req.params.id
+            "_id": req.params.id
         }
         let queryAnd = {}
         Object.assign(query, { "tenant": req.authenticated.tenant })
         const options = { runValidators: true, new: true }
         Demand.findOneAndUpdate({ $and: [query, queryAnd] }, req.body, options)
-          .then(obj => resp.json(obj))
-          .catch(next)
-      }
-    
-    
-      delete = (req, resp, next) => {
+            .then(obj => resp.json(obj))
+            .catch(next)
+    }
+
+
+    delete = (req, resp, next) => {
         let query = {
-          "_id": req.params.id
+            "_id": req.params.id
         }
         Object.assign(query, { "tenant": req.authenticated.tenant })
         Demand.remove(query)
-          .exec()
-          .then((cmdResult: any) => {
-            if (cmdResult.result.n) {
-              resp.send(204)
-            } else {
-              throw new NotFoundError('Document not found.')
-            }
-            return next()
-          }).catch(next)
-      }
+            .exec()
+            .then((cmdResult: any) => {
+                if (cmdResult.result.n) {
+                    resp.send(204)
+                } else {
+                    throw new NotFoundError('Document not found.')
+                }
+                return next()
+            }).catch(next)
+    }
 
 
 
     findStages = (req, resp, next) => {
         let query = {
             "_id": req.params.id,
-            "tenant": req.authenticated.tenant 
+            "tenant": req.authenticated.tenant
         }
         Demand.findOne(query, "+stages")
             .then(rqst => {
@@ -138,7 +139,7 @@ class DemandsRouter extends ModelRouter<Demand> {
     replaceStages = (req, resp, next) => {
         let query = {
             "_id": req.params.id,
-            "tenant": req.authenticated.tenant 
+            "tenant": req.authenticated.tenant
         }
         Demand.findOne(query)
             .then(rqst => {
@@ -153,7 +154,6 @@ class DemandsRouter extends ModelRouter<Demand> {
                 return next()
             }).catch(next)
     }
-
 
 
     applyRoutes(application: restify.Server) {

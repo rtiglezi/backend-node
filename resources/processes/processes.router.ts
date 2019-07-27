@@ -8,6 +8,7 @@ import { NotFoundError } from 'restify-errors'
 
 import * as mongoose from 'mongoose'
 import { Demand } from '../demands/demands.model';
+import { Progress } from '../progresses/progresses.model';
 
 
 class ProcessesRouter extends ModelRouter<Process> {
@@ -44,6 +45,15 @@ class ProcessesRouter extends ModelRouter<Process> {
       {
         $lookup:
         {
+          from: "progresses",
+          localField: "progress",
+          foreignField: "_id",
+          as: "progressDetails"
+        }
+      },
+      {
+        $lookup:
+        {
           from: "divisions",
           localField: "division",
           foreignField: "_id",
@@ -59,9 +69,10 @@ class ProcessesRouter extends ModelRouter<Process> {
           as: "userDetails"
         }
       },
-      {$unwind: '$tenantDetails'},
-      {$unwind: '$divisionDetails'},
-      {$unwind: '$demandDetails'},
+      { $unwind: '$tenantDetails' },
+      { $unwind: '$divisionDetails' },
+      { $unwind: '$demandDetails' },
+      { $unwind: '$progressDetails' },
       {
         $project: {
           "updated_at": '$updated_at',
@@ -72,11 +83,13 @@ class ProcessesRouter extends ModelRouter<Process> {
           "division_name": '$divisionDetails.name',
           "demand_id": '$demandDetails._id',
           "demand_name": '$demandDetails.name',
+          "progress_id": '$progressDetails._id',
+          "progress_date": '$progressDetails.updated_at',
+          "stage_id": '$progressDetails.stage',
           "requester_id": '$requester._id',
           "requester_name": '$requester.name',
           "city": '$city',
           "state": '$state',
-          "stage_id" : '$stage',
           "array_stages": '$demandDetails.stages'
         }
       }
@@ -111,21 +124,33 @@ class ProcessesRouter extends ModelRouter<Process> {
         if (!rqst) {
           throw new NotFoundError('Demand not found.')
         } else {
-          
 
 
-          // insere a primeira etapa da demanda... 
-          req.body.stage = rqst.stages[0]._id
           // cria um novo documento com os atributos do body
           let document = new Process(req.body)
           // salva o documento no banco de dados
           document.save()
-            .then(obj => resp.json(obj))
+            .then(obj => {
+
+              let objProgress = {
+                tenant: obj.tenant,
+                division: obj.division,
+                demand: obj.demand,
+                process: obj._id,
+                user: req.authenticated._id,
+                stage: rqst.stages[0]._id,
+                occurrence: 'Registro automático'
+              }
+              let progress = new Progress(objProgress)
+              progress.save()
+                .then(pgr => {
+
+                  Process.findOneAndUpdate({"_id" : pgr.process }, {"progress": pgr._id})
+                     .then(resp.json(obj))
+                   
+                })
+            })
             .catch(next)
-
-
-
-
         }
       })
 

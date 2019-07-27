@@ -7,7 +7,7 @@ import { usersRouter } from './resources/users/users.router';
 import { divisionsRouter } from './resources/divisions/divisions.router';
 import { demandsRouter } from './resources/demands/demands.router';
 import { processesRouter } from './resources/processes/processes.router';
-
+import { progressesRouter } from './resources/progresses/progresses.router';
 
 // instanciar a classe Server
 const server = new Server()
@@ -22,6 +22,7 @@ server.bootstrap([
     divisionsRouter,
     demandsRouter,
     processesRouter,
+    progressesRouter,
     mainRouter
 ]).then(server => {
     console.log('Server is listening on:', server.application.address())

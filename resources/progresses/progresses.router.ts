@@ -91,20 +91,20 @@ class ProgressesRouter extends ModelRouter<Progress> {
         {
           $project: {
             "updated_at": '$updated_at',
-            "proccess_id": '$proccessDetails._id',
-            "proccess_number": '$proccessDetails.number',
-            "tenant_id": '$tenantDetails._id',
-            "tenant_name": '$tenantDetails.name',
-            "demand_id": '$demandDetails._id',
-            "demand_name": '$demandDetails.name',
-            "division_id": '$divisionDetails._id',
-            "division_name": '$divisionDetails.name',
-            "user_id": '$userDetails._id',
-            "user_name": '$userDetails.name',
+            "proccessId": '$proccessDetails._id',
+            "proccessNumber": '$proccessDetails.number',
+            "tenantId": '$tenantDetails._id',
+            "tenantName": '$tenantDetails.name',
+            "demandId": '$demandDetails._id',
+            "demandName": '$demandDetails.name',
+            "divisionId": '$divisionDetails._id',
+            "divisionName": '$divisionDetails.name',
+            "userId": '$userDetails._id',
+            "userName": '$userDetails.name',
             "occurrence": '$occurrence',
             "stage": '$stage',
-            "stage_id": '$stage',
-            "array_stages": '$demandDetails.stages'
+            "stageId": '$stage',
+            "arrayStages": '$demandDetails.stages'
           }
         }
       ])

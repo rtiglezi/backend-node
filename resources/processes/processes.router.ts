@@ -20,11 +20,6 @@ class ProcessesRouter extends ModelRouter<Process> {
   findAll = (req, resp, next) => {
     Process.aggregate([
       {
-        $match: {
-          tenant: req.authenticated.tenant
-        }
-      },
-      {
         $lookup:
         {
           from: "tenants",
@@ -46,8 +41,8 @@ class ProcessesRouter extends ModelRouter<Process> {
         $lookup:
         {
           from: "progresses",
-          localField: "progress",
-          foreignField: "_id",
+          localField: "_id",
+          foreignField: "process",
           as: "progressDetails"
         }
       },
@@ -77,20 +72,25 @@ class ProcessesRouter extends ModelRouter<Process> {
         $project: {
           "updated_at": '$updated_at',
           "number": '$number',
-          "tenant_id": '$tenantDetails._id',
-          "tenant_name": '$tenantDetails.name',
-          "division_id": '$divisionDetails._id',
-          "division_name": '$divisionDetails.name',
-          "demand_id": '$demandDetails._id',
-          "demand_name": '$demandDetails.name',
-          "progress_id": '$progressDetails._id',
-          "progress_date": '$progressDetails.updated_at',
-          "stage_id": '$progressDetails.stage',
-          "requester_id": '$requester._id',
-          "requester_name": '$requester.name',
+          "tenantId": '$tenantDetails._id',
+          "tenantName": '$tenantDetails.name',
+          "divisionId": '$divisionDetails._id',
+          "divisionName": '$divisionDetails.name',
+          "demandId": '$demandDetails._id',
+          "demandName": '$demandDetails.name',
+          "progressId": '$progressDetails._id',
+          "progressDate": '$progressDetails.updated_at',
+          "stageId": '$progressDetails.stage',
+          "requesterId": '$requester._id',
+          "requesterName": '$requester.name',
           "city": '$city',
           "state": '$state',
-          "array_stages": '$demandDetails.stages'
+          "arrayStages": '$demandDetails.stages'
+        }
+      },
+      {
+        $match: {
+          tenantId: req.authenticated.tenant
         }
       }
     ])
@@ -118,7 +118,7 @@ class ProcessesRouter extends ModelRouter<Process> {
     // insere a identificação do inquilino no "body" da requisição
     req.body.tenant = req.authenticated.tenant
 
-
+    // busca os dados da demanda do processo
     Demand.findOne({ "_id": req.body.demand }, "+stages")
       .then(rqst => {
         if (!rqst) {
@@ -132,6 +132,7 @@ class ProcessesRouter extends ModelRouter<Process> {
           document.save()
             .then(obj => {
 
+              // faz o registro do andamento
               let objProgress = {
                 tenant: obj.tenant,
                 division: obj.division,
@@ -139,12 +140,14 @@ class ProcessesRouter extends ModelRouter<Process> {
                 process: obj._id,
                 user: req.authenticated._id,
                 stage: rqst.stages[0]._id,
+                systemGenerated: true,
                 occurrence: 'Registro automático'
               }
               let progress = new Progress(objProgress)
               progress.save()
                 .then(pgr => {
 
+                  // atualiza o registro em processos
                   Process.findOneAndUpdate({"_id" : pgr.process }, {"progress": pgr._id})
                      .then(resp.json(obj))
                    

@@ -13,6 +13,7 @@ export interface Progress extends mongoose.Document {
     user: mongoose.Types.ObjectId | User
     stage: mongoose.Types.ObjectId
     occurrence: string
+    systemGenerated: boolean
 }
 
 
@@ -47,6 +48,10 @@ const progressSchema = new mongoose.Schema({
     },
     occurrence: {
         type: String,
+        required: true,
+    },
+    systemGenerated: {
+        type: Boolean,
         required: true,
     }
 },

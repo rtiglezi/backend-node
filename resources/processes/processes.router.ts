@@ -20,6 +20,11 @@ class ProcessesRouter extends ModelRouter<Process> {
   findAll = (req, resp, next) => {
     Process.aggregate([
       {
+        $match: {
+          tenant: req.authenticated.tenant,
+        }
+      },
+      {
         $lookup:
         {
           from: "tenants",
@@ -86,11 +91,6 @@ class ProcessesRouter extends ModelRouter<Process> {
           "city": '$city',
           "state": '$state',
           "arrayStages": '$demandDetails.stages'
-        }
-      },
-      {
-        $match: {
-          tenantId: req.authenticated.tenant
         }
       }
     ])

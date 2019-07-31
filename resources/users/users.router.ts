@@ -34,20 +34,20 @@ class UsersRouter extends ModelRouter<User>  {
   }
 
   findByEmail = (req, resp, next) => {
-    let query = { "email": req.query.email }
-    let queryAnd = {}
-    // se o usuário autenticado for do tipo MASTER...
-    if (req.authenticated.profiles.indexOf('master') !== -1) {
-      // listar todos os usuários de nível inferior
-      Object.assign(query, { "profiles": { $nin: ["master"] } })
-    } else {
-      /* caso contrário (será do tipo ADMIN), listar somente os 
-         usuários pertencentes ao mesmo inquilino, e somente os 
-         que são de nível inferior */
-      Object.assign(query, { "tenant": req.authenticated.tenant })
-      Object.assign(queryAnd, { "profiles": { $nin: ["admin", "master"] } })
-    }
     if (req.query.email) {
+      let query = { "email": req.query.email }
+      let queryAnd = {}
+      // se o usuário autenticado for do tipo MASTER...
+      if (req.authenticated.profiles.indexOf('master') !== -1) {
+        // listar todos os usuários de nível inferior
+        Object.assign(query, { "profiles": { $nin: ["master"] } })
+      } else {
+        /* caso contrário (será do tipo ADMIN), listar somente os 
+           usuários pertencentes ao mesmo inquilino, e somente os 
+           que são de nível inferior */
+        Object.assign(query, { "tenant": req.authenticated.tenant })
+        Object.assign(queryAnd, { "profiles": { $nin: ["admin", "master"] } })
+      }
       User.find({ $and: [query, queryAnd] })
         .then(user => {
           user ? [user] : []

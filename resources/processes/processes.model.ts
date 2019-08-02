@@ -4,7 +4,6 @@ import { Tenant } from '../tenants/tenants.model';
 import { Demand } from '../demands/demands.model';
 import { Division } from '../divisions/divisions.model';
 import { User } from '../users/users.model';
-import { Progress } from '../progresses/progresses.model';
 
 
 export interface Requester extends mongoose.Document {
@@ -17,7 +16,6 @@ export interface Requester extends mongoose.Document {
 export interface Process extends mongoose.Document {
     tenant: mongoose.Types.ObjectId | Tenant
     demand: mongoose.Types.ObjectId | Demand
-    progress: mongoose.Types.ObjectId | Progress
     division: mongoose.Types.ObjectId | Division
     user: mongoose.Types.ObjectId | User
     requester: mongoose.Types.ObjectId | Requester
@@ -61,10 +59,6 @@ const processSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Demand',
         required: true
-    },
-    progress: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Progress',
     },
     division: {
         type: mongoose.Schema.Types.ObjectId,

@@ -6,10 +6,8 @@ import { Process } from './processes.model';
 
 import { NotFoundError } from 'restify-errors'
 
-import * as mongoose from 'mongoose'
 import { Demand } from '../demands/demands.model';
 import { Progress } from '../progresses/progresses.model';
-
 
 class ProcessesRouter extends ModelRouter<Process> {
 
@@ -45,34 +43,15 @@ class ProcessesRouter extends ModelRouter<Process> {
       {
         $lookup:
         {
-          from: "progresses",
-          localField: "_id",
-          foreignField: "process",
-          as: "progressDetails"
-        }
-      },
-      {
-        $lookup:
-        {
           from: "divisions",
           localField: "division",
           foreignField: "_id",
           as: "divisionDetails"
         }
       },
-      {
-        $lookup:
-        {
-          from: "users",
-          localField: "user",
-          foreignField: "_id",
-          as: "userDetails"
-        }
-      },
       { $unwind: '$tenantDetails' },
       { $unwind: '$divisionDetails' },
       { $unwind: '$demandDetails' },
-      { $unwind: '$progressDetails' },
       {
         $project: {
           "updated_at": '$updated_at',
@@ -83,20 +62,20 @@ class ProcessesRouter extends ModelRouter<Process> {
           "divisionName": '$divisionDetails.name',
           "demandId": '$demandDetails._id',
           "demandName": '$demandDetails.name',
-          "progressId": '$progressDetails._id',
-          "progressDate": '$progressDetails.updated_at',
-          "stageId": '$progressDetails.stage',
           "requesterId": '$requester._id',
           "requesterName": '$requester.name',
+          "requesterPerson": '$requester.person',
+          "requesterDocument": '$requester.document',  
           "city": '$city',
           "state": '$state',
-          "arrayStages": '$demandDetails.stages'
         }
       }
     ])
       .sort({ number: 1 })
       .then(processes => {
+
         resp.json(processes)
+      
       }).catch(next)
   }
 
@@ -147,10 +126,8 @@ class ProcessesRouter extends ModelRouter<Process> {
               progress.save()
                 .then(pgr => {
 
-                  // atualiza o registro em processos
-                  Process.findOneAndUpdate({"_id" : pgr.process }, {"progress": pgr._id})
-                     .then(resp.json(obj))
-                   
+                  resp.json(obj)
+
                 })
             })
             .catch(next)
@@ -194,6 +171,41 @@ class ProcessesRouter extends ModelRouter<Process> {
   }
 
 
+  updatePrgrs = (req, resp, next) => {
+
+    Process.findOne({ "_id": req.params.id })
+      .then(obj => {
+
+        // faz o registro do andamento
+        let objProgress = {
+          tenant: obj.tenant,
+          division: obj.division,
+          demand: obj.demand,
+          process: obj._id,
+          user: req.authenticated._id,
+          stage: req.body.stageId,
+          systemGenerated: false,
+          occurrence: req.body.occurrence
+        }
+        let progress = new Progress(objProgress)
+        progress.save()
+          .then(pgr => {
+
+            // atualiza o registro em processos
+            Process.findOneAndUpdate({ "_id": pgr.process }, { "progress": pgr._id })
+              .then(resp.json(obj))
+
+          })
+
+      })
+      .catch(next)
+
+
+
+
+  }
+
+
   delete = (req, resp, next) => {
     let query = {
       "_id": req.params.id
@@ -220,6 +232,7 @@ class ProcessesRouter extends ModelRouter<Process> {
     application.post(`${this.basePath}`, [authorize('admin'), this.save])
     application.put(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.replace])
     application.patch(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.update])
+    application.patch(`${this.basePath}/:id/updateprgrs`, [authorize('user'), this.validateId, this.updatePrgrs])
     application.del(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.delete])
 
   }

@@ -22,6 +22,7 @@ exports.authenticate = (req, resp, next) => {
             resp.json({
                 tenant: tenant._id,
                 tenantAlias: tenant.alias,
+                _id: user._id,
                 name: user.name,
                 email: user.email,
                 accessToken: token,

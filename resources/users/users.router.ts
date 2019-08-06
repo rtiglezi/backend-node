@@ -277,6 +277,20 @@ class UsersRouter extends ModelRouter<User>  {
   }
 
 
+  changeDivision(req, resp, next) {
+    let query = {
+      "_id": req.params.id
+    }
+    let obj = {
+      "lastDivision": req.body.lastDivision
+    }
+    User.update(query, obj)
+      .then(() => {
+        resp.send(200)
+      })
+  }
+
+
   applyRoutes(application: restify.Server) {
     // rotas para o CRUD de usuarios
     application.get(`${this.basePath}`, [authorize('admin', 'master'), this.findByEmail, this.findAll])
@@ -294,6 +308,13 @@ class UsersRouter extends ModelRouter<User>  {
       checkOwner,
       changePassword,
     this.update])
+
+
+    application.patch(`${this.basePath}/:id/changedivision`, [authorize('user'),
+    this.validateId,
+      checkOwner,
+    this.changeDivision])
+
 
     application.get(`${this.basePath}/forgotpass/:email/:linkFront`, forgotPassword)
     application.get(`${this.basePath}/resetpass/form/:token/:linkFront`, resetPasswordForm)

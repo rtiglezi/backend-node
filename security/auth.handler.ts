@@ -28,6 +28,7 @@ export const authenticate: restify.RequestHandler = (req, resp, next) => {
                 { 
                   tenant: tenant._id,
                   tenantAlias: tenant.alias,
+                  _id: user._id,
                   name: user.name, 
                   email: user.email, 
                   accessToken: token, 

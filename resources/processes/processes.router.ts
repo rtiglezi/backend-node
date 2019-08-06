@@ -19,7 +19,7 @@ class ProcessesRouter extends ModelRouter<Process> {
     Process.aggregate([
       {
         $match: {
-          tenant: req.authenticated.tenant,
+          tenant: req.authenticated.tenant
         }
       },
       {
@@ -49,6 +49,15 @@ class ProcessesRouter extends ModelRouter<Process> {
           as: "divisionDetails"
         }
       },
+      {
+        $lookup:
+        {
+          from: "progresses",
+          localField: "_id",
+          foreignField: "process",
+          as: "progressDetails"
+        }
+      },
       { $unwind: '$tenantDetails' },
       { $unwind: '$divisionDetails' },
       { $unwind: '$demandDetails' },
@@ -68,6 +77,7 @@ class ProcessesRouter extends ModelRouter<Process> {
           "requesterDocument": '$requester.document',  
           "city": '$city',
           "state": '$state',
+          "progresses": '$progressDetails'
         }
       }
     ])

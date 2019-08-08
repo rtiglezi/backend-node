@@ -25,8 +25,9 @@ exports.authenticate = (req, resp, next) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
-                accessToken: token,
-                profiles: user.profiles
+                profiles: user.profiles,
+                lastDivision: user.lastDivision,
+                accessToken: token
             });
             return next(false);
         });

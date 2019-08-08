@@ -8,6 +8,7 @@ import { NotFoundError } from 'restify-errors'
 
 import { Demand } from '../demands/demands.model';
 import { Progress } from '../progresses/progresses.model';
+import { User } from '../users/users.model';
 
 class ProcessesRouter extends ModelRouter<Process> {
 
@@ -16,10 +17,12 @@ class ProcessesRouter extends ModelRouter<Process> {
   }
 
   findAll = (req, resp, next) => {
+
     Process.aggregate([
       {
         $match: {
-          tenant: req.authenticated.tenant
+          tenant: req.authenticated.tenant,
+          division: req.authenticated.lastDivision
         }
       },
       {

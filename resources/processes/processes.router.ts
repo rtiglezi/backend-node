@@ -8,6 +8,7 @@ import { NotFoundError } from 'restify-errors'
 
 import { Demand } from '../demands/demands.model';
 import { Progress } from '../progresses/progresses.model';
+import { Automatic } from '../automatics/automatics.model';
 import { User } from '../users/users.model';
 
 class ProcessesRouter extends ModelRouter<Process> {
@@ -19,12 +20,7 @@ class ProcessesRouter extends ModelRouter<Process> {
   findAll = (req, resp, next) => {
 
     Process.aggregate([
-      {
-        $match: {
-          tenant: req.authenticated.tenant,
-          division: req.authenticated.lastDivision
-        }
-      },
+
       {
         $lookup:
         {
@@ -55,15 +51,21 @@ class ProcessesRouter extends ModelRouter<Process> {
       {
         $lookup:
         {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "userDetails"
+        }
+      },
+      {
+        $lookup:
+        {
           from: "progresses",
           localField: "_id",
           foreignField: "process",
           as: "progressDetails"
         }
       },
-      { $unwind: '$tenantDetails' },
-      { $unwind: '$divisionDetails' },
-      { $unwind: '$demandDetails' },
       {
         $project: {
           "updated_at": '$updated_at',
@@ -74,13 +76,21 @@ class ProcessesRouter extends ModelRouter<Process> {
           "divisionName": '$divisionDetails.name',
           "demandId": '$demandDetails._id',
           "demandName": '$demandDetails.name',
+          "userId": '$userDetails._id',
+          "userName": '$userDetails.name',
           "requesterId": '$requester._id',
           "requesterName": '$requester.name',
           "requesterPerson": '$requester.person',
-          "requesterDocument": '$requester.document',  
+          "requesterDocument": '$requester.document',
           "city": '$city',
           "state": '$state',
           "progresses": '$progressDetails'
+        }
+      },
+      {
+        $match: {
+          "tenantId": req.authenticated.tenant,
+          "divisionId": req.authenticated.lastDivision
         }
       }
     ])
@@ -88,7 +98,7 @@ class ProcessesRouter extends ModelRouter<Process> {
       .then(processes => {
 
         resp.json(processes)
-      
+
       }).catch(next)
   }
 
@@ -237,6 +247,57 @@ class ProcessesRouter extends ModelRouter<Process> {
   }
 
 
+  assign = (req, resp, next) => {
+
+    let selectedProcesses = req.body.processesId
+    let user = req.body.userId
+
+    let promise = selectedProcesses.map(selecProc => {
+      Process.findOneAndUpdate({ "_id": selecProc }, { "user": user }, req.body)
+        .then(obj => {
+
+
+          User.findOne({ "_id": user })
+            .then(usr => {
+
+              // faz o registro do andamento
+              let objAutomatic = {
+                tenant: obj.tenant,
+                division: obj.division,
+                demand: obj.demand,
+                process: obj._id,
+                user: req.authenticated._id,
+                systemGenerated: true,
+                stage: "Atribuição",
+                occurrence: `Processo atribuído para ${usr.name}`
+              }
+
+              let automatic = new Automatic(objAutomatic)
+              automatic.save()
+                .then(pgr => {
+
+                  // atualiza o registro em processos
+                  Process.findOneAndUpdate({ "_id": pgr.process }, { "progress": pgr._id })
+                    .then(resp.json(obj))
+
+                })
+
+
+            })
+
+
+        })
+
+    })
+
+    Promise.all(promise).then(res => {
+      console.log(promise)
+      resp.json(promise)
+    })
+
+  }
+
+
 
 
   applyRoutes(application: restify.Server) {
@@ -247,6 +308,9 @@ class ProcessesRouter extends ModelRouter<Process> {
     application.patch(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.update])
     application.patch(`${this.basePath}/:id/updateprgrs`, [authorize('user'), this.validateId, this.updatePrgrs])
     application.del(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.delete])
+
+    application.post(`${this.basePath}/assign`, [authorize('user'), this.assign])
+
 
   }
 }

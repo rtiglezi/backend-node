@@ -1,18 +1,18 @@
 import { ModelRouter } from '../../common/model.router'
 import * as restify from 'restify'
-import { Progress } from './progresses.model'
 
 import { authorize } from '../../security/authz.handler';
 
 import { NotFoundError } from 'restify-errors'
 
 import * as mongoose from 'mongoose'
+import { Automatic } from './automatics.model';
 
 
-class ProgressesRouter extends ModelRouter<Progress> {
+class AutomaticsRouter extends ModelRouter<Automatic> {
 
   constructor() {
-    super(Progress)
+    super(Automatic)
   }
 
 
@@ -31,7 +31,7 @@ class ProgressesRouter extends ModelRouter<Progress> {
     }
 
 
-    Progress.aggregate([
+    Automatic.aggregate([
       {
         $match: query
       },
@@ -99,8 +99,7 @@ class ProgressesRouter extends ModelRouter<Progress> {
           "userId": '$userDetails._id',
           "userName": '$userDetails.name',
           "occurrence": '$occurrence',
-          "stage": '$stage',
-          "arrayStages": '$demandDetails.stages'
+          "stage": '$stage'
         }
       }
     ])
@@ -115,7 +114,7 @@ class ProgressesRouter extends ModelRouter<Progress> {
       "_id": req.params.id
     }
     Object.assign(query, { "tenant": req.authenticated.tenant })
-    Progress.findOne(query)
+    Automatic.findOne(query)
       .then(obj => {
         resp.json(obj)
       })
@@ -128,4 +127,4 @@ class ProgressesRouter extends ModelRouter<Progress> {
   }
 }
 
-export const progressesRouter = new ProgressesRouter()
+export const automaticsRouter = new AutomaticsRouter()

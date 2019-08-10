@@ -59,7 +59,21 @@ class UsersRouter extends ModelRouter<User>  {
     }
   }
 
+  findAllForAssign = (req, resp, next) => {
+    /* se o solicitante não tiver o perfil MASTER,
+          então filtrar pelo inquilino ao qual ele pertence */
+    let query = {
+      "tenant": req.authenticated.tenant 
+    }
+    User.find(query)
+      .sort({ name: 1 })
+      .then(users => {
+        resp.json(users)
+      }).catch(next)
+  }
 
+  
+  
   findAll = (req, resp, next) => {
     /* se o solicitante não tiver o perfil MASTER,
           então filtrar pelo inquilino ao qual ele pertence */
@@ -292,7 +306,11 @@ class UsersRouter extends ModelRouter<User>  {
 
 
   applyRoutes(application: restify.Server) {
+    
     // rotas para o CRUD de usuarios
+    
+    application.get(`${this.basePath}/assign`, [authorize('user'), this.findAllForAssign])
+
     application.get(`${this.basePath}`, [authorize('admin', 'master'), this.findByEmail, this.findAll])
     application.get(`${this.basePath}/:id`, [authorize('admin', 'master'), this.validateId, this.findById])
     application.post(`${this.basePath}`, [authorize('admin', 'master'), this.save])

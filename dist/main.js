@@ -8,6 +8,7 @@ const divisions_router_1 = require("./resources/divisions/divisions.router");
 const demands_router_1 = require("./resources/demands/demands.router");
 const processes_router_1 = require("./resources/processes/processes.router");
 const progresses_router_1 = require("./resources/progresses/progresses.router");
+const automatics_router_1 = require("./resources/automatics/automatics.router");
 // instanciar a classe Server
 const server = new server_1.Server();
 /* Invocar o método "bootstrap", que está na classe "Server"
@@ -21,6 +22,7 @@ server.bootstrap([
     demands_router_1.demandsRouter,
     processes_router_1.processesRouter,
     progresses_router_1.progressesRouter,
+    automatics_router_1.automaticsRouter,
     main_router_1.mainRouter
 ]).then(server => {
     console.log('Server is listening on:', server.application.address());

@@ -1,3 +1,4 @@
+import { Division } from './../divisions/divisions.model';
 import * as restify from 'restify'
 import { ModelRouter } from '../../common/model.router'
 
@@ -84,6 +85,7 @@ class ProcessesRouter extends ModelRouter<Process> {
           "requesterDocument": '$requester.document',
           "city": '$city',
           "state": '$state',
+          "submitted": '$submitted',
           "progresses": '$progressDetails'
         }
       },
@@ -247,19 +249,49 @@ class ProcessesRouter extends ModelRouter<Process> {
   }
 
 
-  assign = (req, resp, next) => {
+  send = (req, resp, next) => {
+    let selectedProcesses = req.body.processesId
+    let division = req.body.divisionId
+    let promise = selectedProcesses.map(selecProc => {
+      Process.findOneAndUpdate({ "_id": selecProc }, { "division": division, "user": null, submitted: true }, req.body)
+        .then(obj => {
+          Division.findOne({ "_id": division })
+            .then(div => {
+              // faz o registro do andamento
+              let objAutomatic = {
+                tenant: obj.tenant,
+                division: obj.division,
+                demand: obj.demand,
+                process: obj._id,
+                user: req.authenticated._id,
+                systemGenerated: true,
+                stage: "Tramitação",
+                occurrence: `Processo tramitado para a unidade: ${div.name}`
+              }
+              let automatic = new Automatic(objAutomatic)
+              automatic.save()
+                .then(pgr => {
+                  // atualiza o registro em processos
+                  Process.findOneAndUpdate({ "_id": pgr.process }, { "progress": pgr._id })
+                    .then(resp.json(obj))
+                })
+            })
+        })
+    })
+    Promise.all(promise).then(res => {
+      console.log(promise)
+      resp.json(promise)
+    })
+  }
 
+  assign = (req, resp, next) => {
     let selectedProcesses = req.body.processesId
     let user = req.body.userId
-
     let promise = selectedProcesses.map(selecProc => {
       Process.findOneAndUpdate({ "_id": selecProc }, { "user": user }, req.body)
         .then(obj => {
-
-
           User.findOne({ "_id": user })
             .then(usr => {
-
               // faz o registro do andamento
               let objAutomatic = {
                 tenant: obj.tenant,
@@ -269,32 +301,49 @@ class ProcessesRouter extends ModelRouter<Process> {
                 user: req.authenticated._id,
                 systemGenerated: true,
                 stage: "Atribuição",
-                occurrence: `Processo atribuído para ${usr.name}`
+                occurrence: `Processo atribuído para o usuário: ${usr.name}`
               }
-
               let automatic = new Automatic(objAutomatic)
               automatic.save()
                 .then(pgr => {
-
                   // atualiza o registro em processos
                   Process.findOneAndUpdate({ "_id": pgr.process }, { "progress": pgr._id })
                     .then(resp.json(obj))
-
                 })
-
-
             })
-
-
         })
-
     })
-
     Promise.all(promise).then(res => {
       console.log(promise)
       resp.json(promise)
     })
+  }
 
+
+
+  receive = (req, resp, next) => {
+    let processId = req.params.id
+    Process.findOneAndUpdate({ "_id": processId }, { "submitted": false }, req.body)
+      .then(obj => {
+        // faz o registro do andamento
+        let objAutomatic = {
+          tenant: obj.tenant,
+          division: obj.division,
+          demand: obj.demand,
+          process: obj._id,
+          user: req.authenticated._id,
+          systemGenerated: true,
+          stage: "Recebimento",
+          occurrence: `Processo recebido pelo usuário: ${req.authenticated.name}`
+        }
+        let automatic = new Automatic(objAutomatic)
+        automatic.save()
+          .then(pgr => {
+            // atualiza o registro em processos
+            Process.findOneAndUpdate({ "_id": pgr.process }, { "progress": pgr._id })
+              .then(resp.json(obj))
+          })
+      })
   }
 
 
@@ -310,6 +359,8 @@ class ProcessesRouter extends ModelRouter<Process> {
     application.del(`${this.basePath}/:id`, [authorize('admin'), this.validateId, this.delete])
 
     application.post(`${this.basePath}/assign`, [authorize('user'), this.assign])
+    application.post(`${this.basePath}/send`, [authorize('user'), this.send])
+    application.post(`${this.basePath}/:id/receive`, [authorize('user'), this.receive])
 
 
   }

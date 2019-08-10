@@ -22,6 +22,7 @@ export interface Process extends mongoose.Document {
     number: string
     city: string
     state: string
+    submitted: boolean
 }
 
 
@@ -83,6 +84,9 @@ const processSchema = new mongoose.Schema({
     state: {
         type: String,
         required: true
+    },
+    submitted: {
+        type: Boolean
     }
 },
     {

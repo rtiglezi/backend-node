@@ -1,10 +1,10 @@
-import { ModelRouter } from '../../common/model.router'
-import * as restify from 'restify'
-import { Division } from './divisions.model'
+import * as restify from 'restify';
 
 import { authorize } from '../../security/authz.handler';
+import { NotFoundError } from 'restify-errors';
+import { ModelRouter } from '../../common/model.router';
 
-import { NotFoundError } from 'restify-errors'
+import { Division } from './divisions.model';
 
 
 class DivisionsRouter extends ModelRouter<Division> {
@@ -12,7 +12,6 @@ class DivisionsRouter extends ModelRouter<Division> {
   constructor() {
     super(Division)
   }
-
 
   findBySpecificTenant = (req, resp, next) => {
     let query = {

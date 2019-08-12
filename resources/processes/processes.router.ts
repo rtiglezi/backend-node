@@ -1,16 +1,16 @@
-import { Division } from './../divisions/divisions.model';
 import * as restify from 'restify'
-import { ModelRouter } from '../../common/model.router'
 
 import { authorize } from '../../security/authz.handler';
-import { Process } from './processes.model';
-
 import { NotFoundError } from 'restify-errors'
+import { ModelRouter } from '../../common/model.router'
 
+import { Division } from './../divisions/divisions.model';
+import { Process } from './processes.model';
 import { Demand } from '../demands/demands.model';
 import { Progress } from '../progresses/progresses.model';
 import { Automatic } from '../automatics/automatics.model';
 import { User } from '../users/users.model';
+
 
 class ProcessesRouter extends ModelRouter<Process> {
 
@@ -19,9 +19,7 @@ class ProcessesRouter extends ModelRouter<Process> {
   }
 
   findAll = (req, resp, next) => {
-
     Process.aggregate([
-
       {
         $lookup:
         {
@@ -98,18 +96,16 @@ class ProcessesRouter extends ModelRouter<Process> {
     ])
       .sort({ number: 1 })
       .then(processes => {
-
         resp.json(processes)
-
       }).catch(next)
   }
 
 
   findById = (req, resp, next) => {
     let query = {
-      "_id": req.params.id
+      "_id": req.params.id,
+      "tenant": req.authenticated.tenant
     }
-    Object.assign(query, { "tenant": req.authenticated.tenant })
     Process.findOne(query)
       .then(obj => {
         resp.json(obj)
@@ -121,21 +117,21 @@ class ProcessesRouter extends ModelRouter<Process> {
   save = (req, resp, next) => {
     // insere a identificação do inquilino no "body" da requisição
     req.body.tenant = req.authenticated.tenant
-
     // busca os dados da demanda do processo
-    Demand.findOne({ "_id": req.body.demand }, "+stages")
+    let query = {
+      "_id": req.body.demand,
+      "tenant": req.authenticated.tenant
+    }
+    Demand.findOne(query, "+stages")
       .then(rqst => {
         if (!rqst) {
           throw new NotFoundError('Demand not found.')
         } else {
-
-
           // cria um novo documento com os atributos do body
           let document = new Process(req.body)
           // salva o documento no banco de dados
           document.save()
             .then(obj => {
-
               // faz o registro do andamento
               let objProgress = {
                 tenant: obj.tenant,
@@ -150,25 +146,20 @@ class ProcessesRouter extends ModelRouter<Process> {
               let progress = new Progress(objProgress)
               progress.save()
                 .then(pgr => {
-
                   resp.json(obj)
-
                 })
             })
             .catch(next)
         }
       })
-
-
-
   }
 
 
   replace = (req, resp, next) => {
     let query = {
-      "_id": req.params.id
+      "_id": req.params.id,
+      "tenant": req.authenticated.tenant
     }
-    Object.assign(query, { "tenant": req.authenticated.tenant })
     const options = { runValidators: true, overwrite: true }
     Process.update(query, req.body, options)
       .exec().then(result => {
@@ -185,22 +176,23 @@ class ProcessesRouter extends ModelRouter<Process> {
 
   update = (req, resp, next) => {
     let query = {
-      "_id": req.params.id
+      "_id": req.params.id,
+      "tenant": req.authenticated.tenant
     }
-    let queryAnd = {}
-    Object.assign(query, { "tenant": req.authenticated.tenant })
     const options = { runValidators: true, new: true }
-    Process.findOneAndUpdate({ $and: [query, queryAnd] }, req.body, options)
+    Process.findOneAndUpdate(query, req.body, options)
       .then(obj => resp.json(obj))
       .catch(next)
   }
 
 
   updatePrgrs = (req, resp, next) => {
-
-    Process.findOne({ "_id": req.params.id })
+    let query = {
+      "_id": req.params.id,
+      "tenant": req.authenticated.tenant
+    }
+    Process.findOne(query)
       .then(obj => {
-
         // faz o registro do andamento
         let objProgress = {
           tenant: obj.tenant,
@@ -215,27 +207,20 @@ class ProcessesRouter extends ModelRouter<Process> {
         let progress = new Progress(objProgress)
         progress.save()
           .then(pgr => {
-
             // atualiza o registro em processos
             Process.findOneAndUpdate({ "_id": pgr.process }, { "progress": pgr._id })
               .then(resp.json(obj))
-
           })
-
       })
       .catch(next)
-
-
-
-
   }
 
 
   delete = (req, resp, next) => {
     let query = {
-      "_id": req.params.id
+      "_id": req.params.id,
+      "tenant": req.authenticated.tenant
     }
-    Object.assign(query, { "tenant": req.authenticated.tenant })
     Process.remove(query)
       .exec()
       .then((cmdResult: any) => {
@@ -253,7 +238,11 @@ class ProcessesRouter extends ModelRouter<Process> {
     let selectedProcesses = req.body.processesId
     let division = req.body.divisionId
     let promise = selectedProcesses.map(selecProc => {
-      Process.findOneAndUpdate({ "_id": selecProc }, { "division": division, "user": null, submitted: true }, req.body)
+      let query = {
+        "_id": selecProc,
+        "tenant": req.authenticated.tenant
+      }
+      Process.findOneAndUpdate(query, { "division": division, "user": null, submitted: true }, req.body)
         .then(obj => {
           Division.findOne({ "_id": division })
             .then(div => {
@@ -288,7 +277,11 @@ class ProcessesRouter extends ModelRouter<Process> {
     let selectedProcesses = req.body.processesId
     let user = req.body.userId
     let promise = selectedProcesses.map(selecProc => {
-      Process.findOneAndUpdate({ "_id": selecProc }, { "user": user }, req.body)
+      let query = {
+        "_id": selecProc,
+        "tenant": req.authenticated.tenant
+      }
+      Process.findOneAndUpdate(query, { "user": user }, req.body)
         .then(obj => {
           User.findOne({ "_id": user })
             .then(usr => {
@@ -323,7 +316,11 @@ class ProcessesRouter extends ModelRouter<Process> {
 
   receive = (req, resp, next) => {
     let processId = req.params.id
-    Process.findOneAndUpdate({ "_id": processId }, { "submitted": false }, req.body)
+    let query = {
+      "_id": processId,
+      "tenant": req.authenticated.tenant
+    }
+    Process.findOneAndUpdate(query, { "submitted": false }, req.body)
       .then(obj => {
         // faz o registro do andamento
         let objAutomatic = {

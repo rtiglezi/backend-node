@@ -1,13 +1,11 @@
-import { ModelRouter } from '../../common/model.router'
 import * as restify from 'restify'
+import * as mongoose from 'mongoose'
 
 import { authorize } from '../../security/authz.handler';
-
+import { ModelRouter } from '../../common/model.router'
 import { NotFoundError } from 'restify-errors'
 
-import * as mongoose from 'mongoose'
 import { Automatic } from './automatics.model';
-
 
 class AutomaticsRouter extends ModelRouter<Automatic> {
 
@@ -15,13 +13,10 @@ class AutomaticsRouter extends ModelRouter<Automatic> {
     super(Automatic)
   }
 
-
   findAll = (req, resp, next) => {
-
     let query = {
       tenant: req.authenticated.tenant
     }
-
     if (req.query.processId) {
       if (!mongoose.Types.ObjectId.isValid(req.query.processId)) {
         next(new NotFoundError('Invalid Id.'))
@@ -29,8 +24,6 @@ class AutomaticsRouter extends ModelRouter<Automatic> {
         Object.assign(query, { process: mongoose.Types.ObjectId(req.query.processId) })
       }
     }
-
-
     Automatic.aggregate([
       {
         $match: query
@@ -111,9 +104,9 @@ class AutomaticsRouter extends ModelRouter<Automatic> {
 
   findById = (req, resp, next) => {
     let query = {
-      "_id": req.params.id
+      "_id": req.params.id,
+      "tenant": req.authenticated.tenant
     }
-    Object.assign(query, { "tenant": req.authenticated.tenant })
     Automatic.findOne(query)
       .then(obj => {
         resp.json(obj)

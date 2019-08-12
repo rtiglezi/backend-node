@@ -1,13 +1,11 @@
-import { ModelRouter } from '../../common/model.router'
-import * as restify from 'restify'
-import { Progress } from './progresses.model'
+import * as restify from 'restify';
+import * as mongoose from 'mongoose';
 
+import { NotFoundError } from 'restify-errors';
+import { ModelRouter } from '../../common/model.router';
 import { authorize } from '../../security/authz.handler';
 
-import { NotFoundError } from 'restify-errors'
-
-import * as mongoose from 'mongoose'
-
+import { Progress } from './progresses.model';
 
 class ProgressesRouter extends ModelRouter<Progress> {
 
@@ -15,13 +13,10 @@ class ProgressesRouter extends ModelRouter<Progress> {
     super(Progress)
   }
 
-
   findAll = (req, resp, next) => {
-
     let query = {
       tenant: req.authenticated.tenant
     }
-
     if (req.query.processId) {
       if (!mongoose.Types.ObjectId.isValid(req.query.processId)) {
         next(new NotFoundError('Invalid Id.'))
@@ -29,8 +24,6 @@ class ProgressesRouter extends ModelRouter<Progress> {
         Object.assign(query, { process: mongoose.Types.ObjectId(req.query.processId) })
       }
     }
-
-
     Progress.aggregate([
       {
         $match: query
@@ -112,9 +105,9 @@ class ProgressesRouter extends ModelRouter<Progress> {
 
   findById = (req, resp, next) => {
     let query = {
-      "_id": req.params.id
+      "_id": req.params.id,
+      "tenant": req.authenticated.tenant
     }
-    Object.assign(query, { "tenant": req.authenticated.tenant })
     Progress.findOne(query)
       .then(obj => {
         resp.json(obj)

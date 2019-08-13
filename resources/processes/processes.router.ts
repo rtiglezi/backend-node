@@ -1,4 +1,5 @@
 import * as restify from 'restify'
+import * as mongoose from 'mongoose'
 
 import { authorize } from '../../security/authz.handler';
 import { NotFoundError } from 'restify-errors'
@@ -101,17 +102,105 @@ class ProcessesRouter extends ModelRouter<Process> {
   }
 
 
+
   findById = (req, resp, next) => {
     let query = {
-      "_id": req.params.id,
-      "tenant": req.authenticated.tenant
+       "processId": mongoose.Types.ObjectId(req.params.id),
+       "tenantId": req.authenticated.tenant
     }
-    Process.findOne(query)
-      .then(obj => {
-        resp.json(obj)
-      })
-      .catch(next)
+    Process.aggregate([
+      {
+        $lookup:
+        {
+          from: "tenants",
+          localField: "tenant",
+          foreignField: "_id",
+          as: "tenantDetails"
+        }
+      },
+      {
+        $lookup:
+        {
+          from: "demands",
+          localField: "demand",
+          foreignField: "_id",
+          as: "demandDetails"
+        }
+      },
+      {
+        $lookup:
+        {
+          from: "divisions",
+          localField: "division",
+          foreignField: "_id",
+          as: "divisionDetails"
+        }
+      },
+      {
+        $lookup:
+        {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "userDetails"
+        }
+      },
+      {
+        $lookup:
+        {
+          from: "progresses",
+          localField: "_id",
+          foreignField: "process",
+          as: "progressDetails"
+        }
+      },
+      {
+        $project: {
+          "processId": '$_id',
+          "updated_at": '$updated_at',
+          "number": '$number',
+          "tenantId": '$tenantDetails._id',
+          "tenantName": '$tenantDetails.name',
+          "divisionId": '$divisionDetails._id',
+          "divisionName": '$divisionDetails.name',
+          "demandId": '$demandDetails._id',
+          "demandName": '$demandDetails.name',
+          "userId": '$userDetails._id',
+          "userName": '$userDetails.name',
+          "requesterId": '$requester._id',
+          "requesterName": '$requester.name',
+          "requesterPerson": '$requester.person',
+          "requesterDocument": '$requester.document',
+          "city": '$city',
+          "state": '$state',
+          "submitted": '$submitted',
+          "progresses": '$progressDetails'
+        }
+      },
+      {
+        $match: query
+      }
+    ])
+      .sort({ number: 1 })
+      .then(processes => {
+        resp.json(processes)
+      }).catch(next)
   }
+
+  
+  
+  
+  // findById = (req, resp, next) => {
+  //   let query = {
+  //     "_id": req.params.id,
+  //     "tenant": req.authenticated.tenant
+  //   }
+  //   Process.findOne(query)
+  //     .then(obj => {
+  //       resp.json(obj)
+  //     })
+  //     .catch(next)
+  // }
 
 
   save = (req, resp, next) => {
@@ -268,7 +357,6 @@ class ProcessesRouter extends ModelRouter<Process> {
         })
     })
     Promise.all(promise).then(res => {
-      console.log(promise)
       resp.json(promise)
     })
   }
@@ -307,7 +395,6 @@ class ProcessesRouter extends ModelRouter<Process> {
         })
     })
     Promise.all(promise).then(res => {
-      console.log(promise)
       resp.json(promise)
     })
   }

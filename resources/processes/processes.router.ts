@@ -20,6 +20,16 @@ class ProcessesRouter extends ModelRouter<Process> {
   }
 
   findAll = (req, resp, next) => {
+
+    let query = {
+      "tenantId": req.authenticated.tenant,
+      "divisionId": req.authenticated.lastDivision
+    }
+
+    if (req.query.number) {
+      Object.assign(query, {"number": { $regex: req.query.number }})
+    }
+
     Process.aggregate([
       {
         $lookup:
@@ -89,10 +99,7 @@ class ProcessesRouter extends ModelRouter<Process> {
         }
       },
       {
-        $match: {
-          "tenantId": req.authenticated.tenant,
-          "divisionId": req.authenticated.lastDivision
-        }
+        $match: query
       }
     ])
       .sort({ number: 1 })
@@ -186,21 +193,6 @@ class ProcessesRouter extends ModelRouter<Process> {
         resp.json(processes)
       }).catch(next)
   }
-
-  
-  
-  
-  // findById = (req, resp, next) => {
-  //   let query = {
-  //     "_id": req.params.id,
-  //     "tenant": req.authenticated.tenant
-  //   }
-  //   Process.findOne(query)
-  //     .then(obj => {
-  //       resp.json(obj)
-  //     })
-  //     .catch(next)
-  // }
 
 
   save = (req, resp, next) => {

@@ -27,7 +27,7 @@ class ProcessesRouter extends ModelRouter<Process> {
     }
 
     if (req.query.number) {
-      Object.assign(query, {"number": { $regex: req.query.number }})
+      Object.assign(query, {"number": { $regex: escape(req.query.number) }})
     }
 
     Process.aggregate([
@@ -181,7 +181,11 @@ class ProcessesRouter extends ModelRouter<Process> {
           "city": '$city',
           "state": '$state',
           "submitted": '$submitted',
-          "progresses": '$progressDetails'
+          "progresses": '$progressDetails',
+          "requester": '$requester',
+          "division": '$division',
+          "demand": '$demand',
+          "protocolDate": '$protocolDate'
         }
       },
       {
@@ -190,7 +194,7 @@ class ProcessesRouter extends ModelRouter<Process> {
     ])
       .sort({ number: 1 })
       .then(processes => {
-        resp.json(processes)
+        resp.json(processes[0])
       }).catch(next)
   }
 
@@ -282,9 +286,11 @@ class ProcessesRouter extends ModelRouter<Process> {
           process: obj._id,
           user: req.authenticated._id,
           stage: req.body.stageId,
+          result: req.body.resultId,
           systemGenerated: false,
           occurrence: req.body.occurrence
         }
+        
         let progress = new Progress(objProgress)
         progress.save()
           .then(pgr => {
@@ -320,7 +326,7 @@ class ProcessesRouter extends ModelRouter<Process> {
     let division = req.body.divisionId
     let promise = selectedProcesses.map(selecProc => {
       let query = {
-        "_id": selecProc,
+        "_id": escape(selecProc),
         "tenant": req.authenticated.tenant
       }
       Process.findOneAndUpdate(query, { "division": division, "user": null, submitted: true }, req.body)
@@ -358,7 +364,7 @@ class ProcessesRouter extends ModelRouter<Process> {
     let user = req.body.userId
     let promise = selectedProcesses.map(selecProc => {
       let query = {
-        "_id": selecProc,
+        "_id": escape(selecProc),
         "tenant": req.authenticated.tenant
       }
       Process.findOneAndUpdate(query, { "user": user }, req.body)
@@ -436,7 +442,7 @@ class ProcessesRouter extends ModelRouter<Process> {
 
     application.post(`${this.basePath}/assign`, [authorize('user'), this.assign])
     application.post(`${this.basePath}/send`, [authorize('user'), this.send])
-    application.post(`${this.basePath}/:id/receive`, [authorize('user'), this.receive])
+    application.post(`${this.basePath}/:id/receive`, [authorize('user'), this.validateId, this.receive])
 
 
   }

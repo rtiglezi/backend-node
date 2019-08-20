@@ -93,7 +93,9 @@ class ProgressesRouter extends ModelRouter<Progress> {
           "userName": '$userDetails.name',
           "occurrence": '$occurrence',
           "stage": '$stage',
-          "arrayStages": '$demandDetails.stages'
+          "result": '$result', 
+          "arrayStages": '$demandDetails.stages',
+          "arrayResults": '$demandDetails.stages.results'
         }
       }
     ])

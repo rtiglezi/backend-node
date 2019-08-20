@@ -12,6 +12,7 @@ export interface Progress extends mongoose.Document {
     process: mongoose.Types.ObjectId | Process
     user: mongoose.Types.ObjectId | User
     stage: mongoose.Types.ObjectId
+    result: mongoose.Types.ObjectId
     occurrence: string
     systemGenerated: boolean
 }
@@ -46,6 +47,9 @@ const progressSchema = new mongoose.Schema({
     stage: {
         type: mongoose.Schema.Types.ObjectId
     },
+    result: {
+        type: mongoose.Schema.Types.ObjectId
+    },
     occurrence: {
         type: String,
         required: true,
@@ -65,12 +69,9 @@ const progressSchema = new mongoose.Schema({
 
 
 const updateMiddleware = function (next) {
-
     let date = new Date();
     let timestamp = date.getTime();
-
     this.getUpdate().updated_at = timestamp;
-
     next()
 }
 

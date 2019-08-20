@@ -5,12 +5,27 @@ import { NotFoundError, UnauthorizedError, MethodNotAllowedError } from 'restify
 import { ModelRouter } from '../../common/model.router'
 import { User } from '../users/users.model';
 
-
+import * as mongoose from 'mongoose'
 
 class TenantsRouter extends ModelRouter<Tenant> {
 
     constructor() {
         super(Tenant)
+    }
+
+
+    validateId = (req, resp, next) => {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            next(new NotFoundError('Invalid Id.'))
+        } else {
+            this.model.findById(req.params.id).then(obj => {
+                if (obj) {
+                    next()
+                } else {
+                    next(new NotFoundError('Document not found.'))
+                }
+            })
+        }
     }
 
     findAll = (req, resp, next) => {
@@ -20,7 +35,6 @@ class TenantsRouter extends ModelRouter<Tenant> {
         let query = {}
         if (req.authenticated.profiles.indexOf('master') == -1) {
             Object.assign(query, { "_id": req.authenticated.tenant })
-            console.log(query)
         }
 
         Tenant
@@ -107,11 +121,11 @@ class TenantsRouter extends ModelRouter<Tenant> {
 
     applyRoutes(application: restify.Server) {
         application.get(`/tenants`, [authorize('master', 'admin'), this.findAll])
-        application.get(`/tenants/:id`, [authorize('master', 'admin', 'user'), this.findById])
+        application.get(`/tenants/:id`, [authorize('master', 'admin', 'user'), this.validateId, this.findById])
         application.post(`/tenants`, [authorize('master'), this.save])
-        application.put(`/tenants/:id`, [authorize('master'), this.replace])
-        application.patch(`/tenants/:id`, [authorize('master'), this.update])
-        application.del(`/tenants/:id`, [authorize('master'), this.checkFKs, this.delete])
+        application.put(`/tenants/:id`, [authorize('master'), this.validateId, this.replace])
+        application.patch(`/tenants/:id`, [authorize('master'), this.validateId, this.update])
+        application.del(`/tenants/:id`, [authorize('master'), this.validateId, this.checkFKs, this.delete])
     }
 }
 

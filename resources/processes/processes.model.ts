@@ -22,7 +22,8 @@ export interface Process extends mongoose.Document {
     number: string
     city: string
     state: string
-    submitted: boolean
+    submitted: boolean,
+    protocolDate: Date
 }
 
 
@@ -87,6 +88,9 @@ const processSchema = new mongoose.Schema({
     },
     submitted: {
         type: Boolean
+    },
+    protocolDate: {
+        type: Date
     }
 },
     {

@@ -15,7 +15,7 @@ class DivisionsRouter extends ModelRouter<Division> {
 
   findBySpecificTenant = (req, resp, next) => {
     let query = {
-      "tenant": req.query.tenant
+      "tenant": escape(req.query.tenant)
     }
     if (req.query.tenant) {
       Division.find(query)
@@ -39,8 +39,6 @@ class DivisionsRouter extends ModelRouter<Division> {
     if ((profiles.indexOf('master') == -1) && (profiles.indexOf('admin') == -1)) {
       Object.assign(query, { "_id": { $in: allowedDivisions } })
     }
-
-    console.log("query===>", query)
 
     this.model
       .find(query)

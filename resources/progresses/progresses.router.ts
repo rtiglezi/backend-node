@@ -25,6 +25,23 @@ class ProgressesRouter extends ModelRouter<Progress> {
         Object.assign(query, { process: mongoose.Types.ObjectId(req.query.processId) })
       }
     }
+    if (req.query.demand) {
+      Object.assign(query, {
+        "demand": mongoose.Types.ObjectId(req.query.demand)
+      })
+    }
+    if (req.query.stage) {
+      Object.assign(query, {
+        "stage": mongoose.Types.ObjectId(req.query.stage)
+      })
+      if (req.query.rIds) {
+        let arr = req.query.rIds.map(ele => mongoose.Types.ObjectId(ele));
+        Object.assign(query, {
+          "result": { $in: arr }
+        })
+      }
+    }
+    
     Progress.aggregate([
       {
         $match: query
@@ -94,7 +111,7 @@ class ProgressesRouter extends ModelRouter<Progress> {
           "userName": '$userDetails.name',
           "occurrence": '$occurrence',
           "stage": '$stage',
-          "result": '$result', 
+          "result": '$result',
           "arrayStages": '$demandDetails.stages',
           "arrayResults": '$demandDetails.stages.results'
         }
@@ -102,6 +119,9 @@ class ProgressesRouter extends ModelRouter<Progress> {
     ])
       .sort({ number: 1 })
       .then(processes => {
+
+        console.log("=======>", query)
+
         resp.json(processes)
       }).catch(next)
   }

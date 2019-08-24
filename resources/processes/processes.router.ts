@@ -13,6 +13,7 @@ import { Automatic } from '../automatics/automatics.model';
 import { User } from '../users/users.model';
 
 
+
 class ProcessesRouter extends ModelRouter<Process> {
 
   constructor() {
@@ -27,7 +28,25 @@ class ProcessesRouter extends ModelRouter<Process> {
     }
 
     if (req.query.number) {
-      Object.assign(query, {"number": { $regex: escape(req.query.number) }})
+      Object.assign(query, {
+        $or: [
+          {
+            "number": { $regex: escape(req.query.number) }
+          },
+          {
+            "city": { $regex: escape(req.query.number), $options: "i" }
+          },
+          {
+            "requesterName": { $regex: escape(req.query.number), $options: "i" }
+          }
+        ]
+      })
+    }
+
+    if (req.query.user) {
+      if (req.query.user == 'mine') {
+        Object.assign(query, { "userId": req.authenticated._id })
+      }
     }
 
     Process.aggregate([
@@ -112,8 +131,8 @@ class ProcessesRouter extends ModelRouter<Process> {
 
   findById = (req, resp, next) => {
     let query = {
-       "processId": mongoose.Types.ObjectId(req.params.id),
-       "tenantId": req.authenticated.tenant
+      "processId": mongoose.Types.ObjectId(req.params.id),
+      "tenantId": req.authenticated.tenant
     }
     Process.aggregate([
       {
@@ -290,7 +309,7 @@ class ProcessesRouter extends ModelRouter<Process> {
           systemGenerated: false,
           occurrence: req.body.occurrence
         }
-        
+
         let progress = new Progress(objProgress)
         progress.save()
           .then(pgr => {

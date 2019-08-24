@@ -15,7 +15,8 @@ class ProgressesRouter extends ModelRouter<Progress> {
 
   findAll = (req, resp, next) => {
     let query = {
-      tenant: req.authenticated.tenant
+      tenant: req.authenticated.tenant,
+      division: req.authenticated.lastDivision
     }
     if (req.query.processId) {
       if (!mongoose.Types.ObjectId.isValid(req.query.processId)) {
